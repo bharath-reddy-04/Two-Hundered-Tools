@@ -1,0 +1,319 @@
+[
+  {
+    "task_id": "task_01_create_issue",
+    "name": "Create an issue",
+    "difficulty": "easy",
+    "operation_count": 1,
+    "prompt": "Create an issue titled 'eval-issue-001: Login bug' describing a problem where users cannot log in due to an invalid token error.",
+    "expected_operations": [
+      "issues/create"
+    ],
+    "expected_state": {
+      "issue": {
+        "exists": true,
+        "title": "eval-issue-001: Login bug",
+        "body_contains": "invalid token",
+        "state": "open"
+      }
+    }
+  },
+  {
+    "task_id": "task_02_create_issue_with_label",
+    "name": "Create issue + label",
+    "difficulty": "easy",
+    "operation_count": 2,
+    "prompt": "Create an issue titled 'eval-issue-002: Login failure' describing a login failure and add the 'bug' label.",
+    "expected_operations": [
+      "issues/create"
+    ],
+    "expected_state": {
+      "issue": {
+        "exists": true,
+        "title": "eval-issue-002: Login failure",
+        "state": "open",
+        "labels": [
+          "bug"
+        ]
+      }
+    }
+  },
+  {
+    "task_id": "task_03_create_branch",
+    "name": "Create branch",
+    "difficulty": "easy",
+    "operation_count": 1,
+    "prompt": "Create a branch called 'eval-branch-003-feature-login' from 'main'.",
+    "expected_operations": [
+      "git/create-ref"
+    ],
+    "expected_state": {
+      "branch": {
+        "exists": true,
+        "name": "eval-branch-003-feature-login",
+        "base": "main"
+      }
+    }
+  },
+  {
+    "task_id": "task_04_create_branch_and_issue",
+    "name": "Create branch + issue",
+    "difficulty": "easy",
+    "operation_count": 2,
+    "prompt": "Create a branch called 'eval-branch-004-feature-login' from 'main', then create an issue titled 'eval-issue-004: Login feature' describing the required login functionality.",
+    "expected_operations": [
+      "git/create-ref",
+      "issues/create"
+    ],
+    "expected_state": {
+      "branch": {
+        "exists": true,
+        "name": "eval-branch-004-feature-login",
+        "base": "main"
+      },
+      "issue": {
+        "exists": true,
+        "title": "eval-issue-004: Login feature",
+        "state": "open"
+      }
+    }
+  },
+  {
+    "task_id": "task_05_create_issue_and_comment",
+    "name": "Create issue + comment",
+    "difficulty": "medium",
+    "operation_count": 2,
+    "prompt": "Create an issue titled 'eval-issue-005: Login bug' describing the login problem, then add a comment saying 'Investigating this issue'.",
+    "expected_operations": [
+      "issues/create",
+      "issues/create-comment"
+    ],
+    "expected_state": {
+      "issue": {
+        "exists": true,
+        "title": "eval-issue-005: Login bug",
+        "state": "open",
+        "comments": 1,
+        "comment_contains": "Investigating this issue"
+      }
+    }
+  },
+  {
+    "task_id": "task_06_create_and_update_issue",
+    "name": "Create issue + update issue",
+    "difficulty": "medium",
+    "operation_count": 2,
+    "prompt": "Create an issue titled 'eval-issue-006: Login bug', then update its title to 'eval-issue-006: Critical login bug' and change its description to indicate that all new users are affected.",
+    "expected_operations": [
+      "issues/create",
+      "issues/update"
+    ],
+    "expected_state": {
+      "issue": {
+        "exists": true,
+        "title": "eval-issue-006: Critical login bug",
+        "body_contains": "all new users are affected",
+        "state": "open"
+      }
+    }
+  },
+  {
+    "task_id": "task_07_create_branch_and_pr",
+    "name": "Create branch + PR",
+    "difficulty": "medium",
+    "operation_count": 2,
+    "prompt": "Create a branch called 'eval-branch-007-feature-login' from 'main', then open a pull request from 'eval-branch-007-feature-login' into 'main' titled 'eval-pr-007: Add login feature'.",
+    "expected_operations": [
+      "git/create-ref",
+      "pulls/create"
+    ],
+    "expected_state": {
+      "branch": {
+        "exists": true,
+        "name": "eval-branch-007-feature-login",
+        "base": "main"
+      },
+      "pull_request": {
+        "exists": true,
+        "title": "eval-pr-007: Add login feature",
+        "head": "eval-branch-007-feature-login",
+        "base": "main",
+        "state": "open"
+      }
+    }
+  },
+  {
+    "task_id": "task_08_create_branch_issue_pr",
+    "name": "Create branch + issue + PR",
+    "difficulty": "medium",
+    "operation_count": 3,
+    "prompt": "Create a branch called 'eval-branch-008-bug-fix' from 'main'. Create an issue titled 'eval-issue-008: Fix login failure'. Then create a pull request from 'eval-branch-008-bug-fix' into 'main' referencing that issue.",
+    "expected_operations": [
+      "git/create-ref",
+      "issues/create",
+      "pulls/create"
+    ],
+    "expected_state": {
+      "branch": {
+        "exists": true,
+        "name": "eval-branch-008-bug-fix",
+        "base": "main"
+      },
+      "issue": {
+        "exists": true,
+        "title": "eval-issue-008: Fix login failure",
+        "state": "open"
+      },
+      "pull_request": {
+        "exists": true,
+        "head": "eval-branch-008-bug-fix",
+        "base": "main",
+        "state": "open",
+        "references_issue": "eval-issue-008"
+      }
+    }
+  },
+  {
+    "task_id": "task_09_branch_issue_pr_label",
+    "name": "Branch + issue + PR + label",
+    "difficulty": "hard",
+    "operation_count": 4,
+    "prompt": "Create a branch called 'eval-branch-009-bug-fix' from 'main'. Create an issue titled 'eval-issue-009: Login failure' describing the bug. Create an open pull request from 'eval-branch-009-bug-fix' into 'main' that references the issue. Add the 'needs-review' label to the issue.",
+    "expected_operations": [
+      "git/create-ref",
+      "issues/create",
+      "pulls/create",
+      "issues/update"
+    ],
+    "expected_state": {
+      "branch": {
+        "exists": true,
+        "name": "eval-branch-009-bug-fix",
+        "base": "main"
+      },
+      "issue": {
+        "exists": true,
+        "title": "eval-issue-009: Login failure",
+        "state": "open",
+        "labels": [
+          "needs-review"
+        ]
+      },
+      "pull_request": {
+        "exists": true,
+        "head": "eval-branch-009-bug-fix",
+        "base": "main",
+        "state": "open",
+        "references_issue": "eval-issue-009"
+      }
+    }
+  },
+  {
+    "task_id": "task_10_issue_label_comment_close",
+    "name": "Create issue + label + comment + close",
+    "difficulty": "hard",
+    "operation_count": 4,
+    "prompt": "Create an issue titled 'eval-issue-010: Resolved login bug', add the 'bug' label, add a comment saying 'Fix has been implemented', and close the issue.",
+    "expected_operations": [
+      "issues/create",
+      "issues/create-comment",
+      "issues/update"
+    ],
+    "expected_state": {
+      "issue": {
+        "exists": true,
+        "title": "eval-issue-010: Resolved login bug",
+        "state": "closed",
+        "labels": [
+          "bug"
+        ],
+        "comment_contains": "Fix has been implemented"
+      }
+    }
+  },
+  {
+    "task_id": "task_11_branch_pr_merge",
+    "name": "Create branch + PR + merge",
+    "difficulty": "hard",
+    "operation_count": 3,
+    "prompt": "Create a branch called 'eval-branch-011-feature-login' from 'main', create a pull request from 'eval-branch-011-feature-login' into 'main' titled 'eval-pr-011: Add login feature', and merge the pull request.",
+    "expected_operations": [
+      "git/create-ref",
+      "pulls/create",
+      "pulls/merge"
+    ],
+    "expected_state": {
+      "branch": {
+        "exists": true,
+        "name": "eval-branch-011-feature-login",
+        "base": "main"
+      },
+      "pull_request": {
+        "exists": true,
+        "title": "eval-pr-011: Add login feature",
+        "head": "eval-branch-011-feature-login",
+        "base": "main",
+        "merged": true
+      }
+    }
+  },
+  {
+    "task_id": "task_12_repository_and_issue",
+    "name": "Create repository + issue",
+    "difficulty": "hard",
+    "operation_count": 2,
+    "prompt": "Create a private repository called 'eval-repo-012-login-sandbox', then create an issue titled 'eval-issue-012: Initial login bug' in that repository.",
+    "expected_operations": [
+      "repos/create-for-authenticated-user",
+      "issues/create"
+    ],
+    "expected_state": {
+      "repository": {
+        "exists": true,
+        "name": "eval-repo-012-login-sandbox",
+        "private": true
+      },
+      "issue": {
+        "exists": true,
+        "title": "eval-issue-012: Initial login bug",
+        "state": "open"
+      }
+    }
+  },
+  {
+    "task_id": "task_13_repo_branch_issue_pr",
+    "name": "Repository + branch + issue + PR",
+    "difficulty": "hard",
+    "operation_count": 4,
+    "prompt": "Create a private repository called 'eval-repo-013-login-workflow'. Create a branch called 'eval-branch-013-feature-login' from 'main'. Create an issue titled 'eval-issue-013: Implement login'. Then create an open pull request from 'eval-branch-013-feature-login' into 'main' referencing the issue.",
+    "expected_operations": [
+      "repos/create-for-authenticated-user",
+      "git/create-ref",
+      "issues/create",
+      "pulls/create"
+    ],
+    "expected_state": {
+      "repository": {
+        "exists": true,
+        "name": "eval-repo-013-login-workflow",
+        "private": true
+      },
+      "branch": {
+        "exists": true,
+        "name": "eval-branch-013-feature-login",
+        "base": "main"
+      },
+      "issue": {
+        "exists": true,
+        "title": "eval-issue-013: Implement login",
+        "state": "open"
+      },
+      "pull_request": {
+        "exists": true,
+        "head": "eval-branch-013-feature-login",
+        "base": "main",
+        "state": "open",
+        "references_issue": "eval-issue-013"
+      }
+    }
+  }
+]
