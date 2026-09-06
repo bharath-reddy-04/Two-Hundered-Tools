@@ -30,7 +30,8 @@ import sys
 from pathlib import Path
 from typing import Any, List, Set
 
-PROJECT_ROOT = Path(__file__).resolve().parent
+_this = Path(__file__).resolve().parent
+PROJECT_ROOT = _this.parent if _this.name == "tasks" else _this
 DEFAULT_TASKS_FILE = PROJECT_ROOT / "tasks.json"
 DEFAULT_CATALOG_FILE = PROJECT_ROOT / "schemas" / "operation_catalog.json"
 

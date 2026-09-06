@@ -1,0 +1,620 @@
+2026-09-05T18:24:28 [INFO] [task_runner] Starting task runner session with PID 68990
+2026-09-05T18:24:28 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T18:24:28 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T18:24:28 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T18:24:44 [INFO] [task_runner] Starting task runner session with PID 68991
+2026-09-05T18:24:44 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T18:24:44 [INFO] [task_runner] Executing task task_04_create_branch_and_issue (attempt 1/1)
+2026-09-05T18:24:47 [INFO] [task_runner] Starting task runner session with PID 68992
+2026-09-05T18:24:47 [INFO] [task_runner] Executing task task_04_create_branch_and_issue (attempt 1/1)
+2026-09-05T18:24:47 [INFO] [task_runner] Executing task task_05_create_issue_and_comment (attempt 1/1)
+2026-09-05T18:24:51 [INFO] [task_runner] Starting task runner session with PID 68994
+2026-09-05T18:24:51 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T18:24:51 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T18:24:51 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T18:24:51 [INFO] [task_runner] Executing task task_04_create_branch_and_issue (attempt 1/1)
+2026-09-05T18:24:51 [INFO] [task_runner] Executing task task_05_create_issue_and_comment (attempt 1/1)
+2026-09-05T18:24:51 [INFO] [task_runner] Executing task task_06_create_and_update_issue (attempt 1/1)
+2026-09-05T18:24:51 [INFO] [task_runner] Executing task task_07_create_branch_and_pr (attempt 1/1)
+2026-09-05T18:24:51 [INFO] [task_runner] Executing task task_08_create_branch_issue_pr (attempt 1/1)
+2026-09-05T18:24:51 [INFO] [task_runner] Executing task task_09_branch_issue_pr_label (attempt 1/1)
+2026-09-05T18:24:51 [INFO] [task_runner] Executing task task_10_issue_label_comment_close (attempt 1/1)
+2026-09-05T18:24:51 [INFO] [task_runner] Executing task task_11_branch_pr_merge (attempt 1/1)
+2026-09-05T18:24:51 [INFO] [task_runner] Executing task task_12_repository_and_issue (attempt 1/1)
+2026-09-05T18:24:51 [INFO] [task_runner] Executing task task_13_repo_branch_issue_pr (attempt 1/1)
+2026-09-05T18:26:12 [INFO] [task_runner] Starting task runner session with PID 69007
+2026-09-05T18:26:12 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T18:26:12 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T18:26:12 [INFO] [task_runner] Starting task runner session with PID 69007
+2026-09-05T18:26:12 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T18:26:12 [INFO] [task_runner] Starting task runner session with PID 69007
+2026-09-05T18:26:19 [INFO] [task_runner] Starting task runner session with PID 69009
+2026-09-05T18:26:19 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T18:26:19 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T18:26:19 [INFO] [task_runner] Starting task runner session with PID 69009
+2026-09-05T18:26:19 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T18:26:19 [INFO] [task_runner] Starting task runner session with PID 69009
+2026-09-05T18:29:57 [INFO] [task_runner] Starting task runner session with PID 69710
+2026-09-05T18:29:58 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=3b7794d1
+2026-09-05T18:29:58 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T18:29:59 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T18:30:00 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T18:30:01 [INFO] [task_runner] Executing task task_04_create_branch_and_issue (attempt 1/1)
+2026-09-05T18:30:03 [INFO] [task_runner] Executing task task_05_create_issue_and_comment (attempt 1/1)
+2026-09-05T18:30:04 [INFO] [task_runner] Executing task task_06_create_and_update_issue (attempt 1/1)
+2026-09-05T18:30:04 [INFO] [task_runner] Executing task task_07_create_branch_and_pr (attempt 1/1)
+2026-09-05T18:30:06 [INFO] [task_runner] Executing task task_08_create_branch_issue_pr (attempt 1/1)
+2026-09-05T18:30:08 [INFO] [task_runner] Executing task task_09_branch_issue_pr_label (attempt 1/1)
+2026-09-05T18:30:10 [INFO] [task_runner] Executing task task_10_issue_label_comment_close (attempt 1/1)
+2026-09-05T18:30:11 [INFO] [task_runner] Executing task task_11_branch_pr_merge (attempt 1/1)
+2026-09-05T18:30:13 [INFO] [task_runner] Executing task task_12_repository_and_issue (attempt 1/1)
+2026-09-05T18:30:14 [INFO] [task_runner] Executing task task_13_repo_branch_issue_pr (attempt 1/1)
+2026-09-05T18:35:39 [INFO] [task_runner] Starting task runner session with PID 71135
+2026-09-05T18:35:39 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T18:35:39 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T18:35:45 [INFO] [task_runner] Starting task runner session with PID 71160
+2026-09-05T18:35:54 [INFO] [task_runner] Starting task runner session with PID 71195
+2026-09-05T18:35:54 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T18:35:54 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T18:35:54 [INFO] [task_runner] Starting task runner session with PID 71195
+2026-09-05T18:35:54 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T18:35:54 [INFO] [task_runner] Starting task runner session with PID 71195
+2026-09-05T18:36:33 [INFO] [task_runner] Starting task runner session with PID 71485
+2026-09-05T18:36:34 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=ec244185
+2026-09-05T18:36:34 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T18:36:40 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T18:36:45 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T18:36:50 [INFO] [task_runner] Executing task task_04_create_branch_and_issue (attempt 1/1)
+2026-09-05T18:37:00 [INFO] [task_runner] Executing task task_05_create_issue_and_comment (attempt 1/1)
+2026-09-05T18:37:06 [INFO] [task_runner] Executing task task_06_create_and_update_issue (attempt 1/1)
+2026-09-05T18:37:13 [INFO] [task_runner] Executing task task_07_create_branch_and_pr (attempt 1/1)
+2026-09-05T18:37:14 [INFO] [task_runner] Executing task task_08_create_branch_issue_pr (attempt 1/1)
+2026-09-05T18:37:16 [INFO] [task_runner] Executing task task_09_branch_issue_pr_label (attempt 1/1)
+2026-09-05T18:37:18 [INFO] [task_runner] Executing task task_10_issue_label_comment_close (attempt 1/1)
+2026-09-05T18:37:19 [INFO] [task_runner] Executing task task_11_branch_pr_merge (attempt 1/1)
+2026-09-05T18:37:21 [INFO] [task_runner] Executing task task_12_repository_and_issue (attempt 1/1)
+2026-09-05T18:37:22 [INFO] [task_runner] Executing task task_13_repo_branch_issue_pr (attempt 1/1)
+2026-09-05T18:42:11 [INFO] [task_runner] Starting task runner session with PID 73170
+2026-09-05T18:42:12 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=0928ec30
+2026-09-05T18:42:12 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T18:42:20 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T18:42:27 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T18:42:38 [INFO] [task_runner] Executing task task_04_create_branch_and_issue (attempt 1/1)
+2026-09-05T18:43:01 [INFO] [task_runner] Executing task task_05_create_issue_and_comment (attempt 1/1)
+2026-09-05T18:46:38 [INFO] [task_runner] Starting task runner session with PID 74899
+2026-09-05T18:46:39 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=eb74083f
+2026-09-05T18:46:39 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T18:46:49 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T18:47:08 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T18:47:27 [INFO] [task_runner] Starting task runner session with PID 75390
+2026-09-05T18:47:28 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=685fd8e3
+2026-09-05T18:47:28 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T18:47:57 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T18:47:59 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T18:48:00 [INFO] [task_runner] Executing task task_04_create_branch_and_issue (attempt 1/1)
+2026-09-05T18:48:03 [INFO] [task_runner] Executing task task_05_create_issue_and_comment (attempt 1/1)
+2026-09-05T18:48:05 [INFO] [task_runner] Executing task task_06_create_and_update_issue (attempt 1/1)
+2026-09-05T18:56:46 [INFO] [task_runner] Starting task runner session with PID 78598
+2026-09-05T18:56:48 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=60e56a08
+2026-09-05T18:56:48 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T18:56:50 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T18:56:52 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T18:56:54 [INFO] [task_runner] Executing task task_04_create_branch_and_issue (attempt 1/1)
+2026-09-05T18:56:57 [INFO] [task_runner] Executing task task_05_create_issue_and_comment (attempt 1/1)
+2026-09-05T18:56:58 [INFO] [task_runner] Executing task task_06_create_and_update_issue (attempt 1/1)
+2026-09-05T18:57:00 [INFO] [task_runner] Executing task task_07_create_branch_and_pr (attempt 1/1)
+2026-09-05T18:57:03 [INFO] [task_runner] Executing task task_08_create_branch_issue_pr (attempt 1/1)
+2026-09-05T18:57:08 [INFO] [task_runner] Executing task task_09_branch_issue_pr_label (attempt 1/1)
+2026-09-05T18:57:12 [INFO] [task_runner] Executing task task_10_issue_label_comment_close (attempt 1/1)
+2026-09-05T18:57:14 [INFO] [task_runner] Executing task task_11_branch_pr_merge (attempt 1/1)
+2026-09-05T18:57:17 [INFO] [task_runner] Executing task task_12_repository_and_issue (attempt 1/1)
+2026-09-05T18:57:19 [INFO] [task_runner] Executing task task_13_repo_branch_issue_pr (attempt 1/1)
+2026-09-05T19:02:05 [INFO] [task_runner] Starting task runner session with PID 80393
+2026-09-05T19:02:06 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=cb9d907c
+2026-09-05T19:02:06 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T19:02:08 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T19:02:10 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T19:02:12 [INFO] [task_runner] Executing task task_04_create_branch_and_issue (attempt 1/1)
+2026-09-05T19:02:15 [INFO] [task_runner] Executing task task_05_create_issue_and_comment (attempt 1/1)
+2026-09-05T19:02:17 [INFO] [task_runner] Executing task task_06_create_and_update_issue (attempt 1/1)
+2026-09-05T19:02:19 [INFO] [task_runner] Executing task task_07_create_branch_and_pr (attempt 1/1)
+2026-09-05T19:02:21 [INFO] [task_runner] Executing task task_08_create_branch_issue_pr (attempt 1/1)
+2026-09-05T19:05:04 [INFO] [task_runner] Starting task runner session with PID 81944
+2026-09-05T19:05:05 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=5f1134fb
+2026-09-05T19:05:05 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T19:05:07 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T19:05:09 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T19:05:11 [INFO] [task_runner] Executing task task_04_create_branch_and_issue (attempt 1/1)
+2026-09-05T19:05:25 [INFO] [task_runner] Starting task runner session with PID 82337
+2026-09-05T19:05:27 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=0260d7f5
+2026-09-05T19:05:27 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T19:05:29 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T19:05:30 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T19:05:32 [INFO] [task_runner] Executing task task_04_create_branch_and_issue (attempt 1/1)
+2026-09-05T19:05:35 [INFO] [task_runner] Executing task task_05_create_issue_and_comment (attempt 1/1)
+2026-09-05T19:05:37 [INFO] [task_runner] Executing task task_06_create_and_update_issue (attempt 1/1)
+2026-09-05T19:05:38 [INFO] [task_runner] Executing task task_07_create_branch_and_pr (attempt 1/1)
+2026-09-05T19:09:07 [INFO] [task_runner] Starting task runner session with PID 83515
+2026-09-05T19:09:08 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=3f0e3953
+2026-09-05T19:09:08 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T19:09:15 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T19:09:21 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T19:09:27 [INFO] [task_runner] Executing task task_04_create_branch_and_issue (attempt 1/1)
+2026-09-05T19:11:39 [INFO] [task_runner] Starting task runner session with PID 84799
+2026-09-05T19:11:40 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=7bbe9fc6
+2026-09-05T19:11:40 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T19:11:47 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T19:11:54 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T19:12:00 [INFO] [task_runner] Executing task task_04_create_branch_and_issue (attempt 1/1)
+2026-09-05T19:12:07 [INFO] [task_runner] Executing task task_05_create_issue_and_comment (attempt 1/1)
+2026-09-05T19:12:13 [INFO] [task_runner] Executing task task_06_create_and_update_issue (attempt 1/1)
+2026-09-05T19:12:20 [INFO] [task_runner] Executing task task_07_create_branch_and_pr (attempt 1/1)
+2026-09-05T19:13:54 [INFO] [task_runner] Starting task runner session with PID 85646
+2026-09-05T19:13:56 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=c9804854
+2026-09-05T19:13:56 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T19:14:03 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T19:14:10 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T19:14:16 [INFO] [task_runner] Executing task task_04_create_branch_and_issue (attempt 1/1)
+2026-09-05T19:14:27 [INFO] [task_runner] Executing task task_05_create_issue_and_comment (attempt 1/1)
+2026-09-05T19:14:34 [INFO] [task_runner] Executing task task_06_create_and_update_issue (attempt 1/1)
+2026-09-05T19:20:00 [INFO] [task_runner] Starting task runner session with PID 87108
+2026-09-05T19:20:00 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T19:20:00 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T19:20:00 [INFO] [task_runner] Starting task runner session with PID 87108
+2026-09-05T19:20:00 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T19:20:00 [INFO] [task_runner] Starting task runner session with PID 87108
+2026-09-05T19:20:29 [INFO] [task_runner] Starting task runner session with PID 87232
+2026-09-05T19:20:29 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T19:20:29 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T19:20:29 [INFO] [task_runner] Starting task runner session with PID 87232
+2026-09-05T19:20:29 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T19:20:29 [INFO] [task_runner] Starting task runner session with PID 87232
+2026-09-05T19:22:45 [INFO] [task_runner] Starting task runner session with PID 87764
+2026-09-05T19:22:45 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T19:22:45 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T19:22:45 [INFO] [task_runner] Starting task runner session with PID 87764
+2026-09-05T19:22:45 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T19:22:45 [INFO] [task_runner] Starting task runner session with PID 87764
+2026-09-05T19:23:04 [INFO] [task_runner] Starting task runner session with PID 87840
+2026-09-05T19:23:04 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T19:23:04 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T19:23:04 [INFO] [task_runner] Starting task runner session with PID 87840
+2026-09-05T19:23:04 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T19:23:04 [INFO] [task_runner] Starting task runner session with PID 87840
+2026-09-05T19:23:04 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T19:23:04 [INFO] [task_runner] Starting task runner session with PID 87840
+2026-09-05T19:23:04 [INFO] [task_runner] Sandbox initialised: owner=testowner run_id=<MagicMock name='mock.run_id' id='4464878192'>
+2026-09-05T19:23:04 [INFO] [task_runner] Starting task runner session with PID 87840
+2026-09-05T19:37:56 [INFO] [task_runner] Starting task runner session with PID 91584
+2026-09-05T19:37:57 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=8b6516c0
+2026-09-05T19:38:23 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T19:38:33 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T19:38:40 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T19:38:47 [INFO] [task_runner] Executing task task_04_create_branch_and_issue (attempt 1/1)
+2026-09-05T19:39:02 [INFO] [task_runner] Executing task task_05_create_issue_and_comment (attempt 1/1)
+2026-09-05T19:39:05 [INFO] [task_runner] Executing task task_06_create_and_update_issue (attempt 1/1)
+2026-09-05T19:39:08 [INFO] [task_runner] Executing task task_07_create_branch_and_pr (attempt 1/1)
+2026-09-05T19:39:13 [INFO] [task_runner] Executing task task_08_create_branch_issue_pr (attempt 1/1)
+2026-09-05T19:39:22 [INFO] [task_runner] Executing task task_09_branch_issue_pr_label (attempt 1/1)
+2026-09-05T19:39:31 [INFO] [task_runner] Executing task task_10_issue_label_comment_close (attempt 1/1)
+2026-09-05T19:39:34 [INFO] [task_runner] Executing task task_11_branch_pr_merge (attempt 1/1)
+2026-09-05T19:39:40 [INFO] [task_runner] Executing task task_12_repository_and_issue (attempt 1/1)
+2026-09-05T19:39:43 [INFO] [task_runner] Executing task task_13_repo_branch_issue_pr (attempt 1/1)
+2026-09-05T22:47:50 [INFO] [task_runner] Starting task runner session with PID 98197
+2026-09-05T22:47:51 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=10a8be2e
+2026-09-05T22:48:04 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T22:48:12 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T22:48:15 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T22:48:18 [INFO] [task_runner] Executing task task_04_create_branch_and_issue (attempt 1/1)
+2026-09-05T22:51:57 [INFO] [task_runner] Starting task runner session with PID 99493
+2026-09-05T22:51:58 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=47495723
+2026-09-05T22:52:07 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T22:52:11 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T22:52:15 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T22:52:18 [INFO] [task_runner] Executing task task_04_create_branch_and_issue (attempt 1/1)
+2026-09-05T22:52:24 [INFO] [task_runner] Executing task task_05_create_issue_and_comment (attempt 1/1)
+2026-09-05T22:52:27 [INFO] [task_runner] Executing task task_06_create_and_update_issue (attempt 1/1)
+2026-09-05T22:52:30 [INFO] [task_runner] Executing task task_07_create_branch_and_pr (attempt 1/1)
+2026-09-05T22:52:36 [INFO] [task_runner] Executing task task_08_create_branch_issue_pr (attempt 1/1)
+2026-09-05T22:52:45 [INFO] [task_runner] Executing task task_09_branch_issue_pr_label (attempt 1/1)
+2026-09-05T22:52:53 [INFO] [task_runner] Executing task task_10_issue_label_comment_close (attempt 1/1)
+2026-09-05T22:52:56 [INFO] [task_runner] Executing task task_11_branch_pr_merge (attempt 1/1)
+2026-09-05T22:53:02 [INFO] [task_runner] Executing task task_12_repository_and_issue (attempt 1/1)
+2026-09-05T22:53:06 [INFO] [task_runner] Executing task task_13_repo_branch_issue_pr (attempt 1/1)
+2026-09-05T22:59:18 [INFO] [task_runner] Starting task runner session with PID 1972
+2026-09-05T22:59:19 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=b2a23024
+2026-09-05T22:59:27 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T22:59:36 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T22:59:43 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T22:59:49 [INFO] [task_runner] Executing task task_04_create_branch_and_issue (attempt 1/1)
+2026-09-05T23:00:02 [INFO] [task_runner] Executing task task_05_create_issue_and_comment (attempt 1/1)
+2026-09-05T23:00:09 [INFO] [task_runner] Executing task task_06_create_and_update_issue (attempt 1/1)
+2026-09-05T23:00:16 [INFO] [task_runner] Executing task task_07_create_branch_and_pr (attempt 1/1)
+2026-09-05T23:00:25 [INFO] [task_runner] Executing task task_08_create_branch_issue_pr (attempt 1/1)
+2026-09-05T23:27:38 [INFO] [task_runner] Starting task runner session with PID 8872
+2026-09-05T23:27:39 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=cfb1d73a
+2026-09-05T23:27:56 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T23:28:04 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T23:28:10 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T23:28:16 [INFO] [task_runner] Executing task task_04_create_branch_and_issue (attempt 1/1)
+2026-09-05T23:28:29 [INFO] [task_runner] Executing task task_05_create_issue_and_comment (attempt 1/1)
+2026-09-05T23:28:35 [INFO] [task_runner] Executing task task_06_create_and_update_issue (attempt 1/1)
+2026-09-05T23:28:42 [INFO] [task_runner] Executing task task_07_create_branch_and_pr (attempt 1/1)
+2026-09-05T23:28:52 [INFO] [task_runner] Executing task task_08_create_branch_issue_pr (attempt 1/1)
+2026-09-05T23:29:06 [INFO] [task_runner] Executing task task_09_branch_issue_pr_label (attempt 1/1)
+2026-09-05T23:29:21 [INFO] [task_runner] Executing task task_10_issue_label_comment_close (attempt 1/1)
+2026-09-05T23:29:28 [INFO] [task_runner] Executing task task_11_branch_pr_merge (attempt 1/1)
+2026-09-05T23:29:37 [INFO] [task_runner] Executing task task_12_repository_and_issue (attempt 1/1)
+2026-09-05T23:29:43 [INFO] [task_runner] Executing task task_13_repo_branch_issue_pr (attempt 1/1)
+2026-09-05T23:31:28 [INFO] [task_runner] Starting task runner session with PID 9961
+2026-09-05T23:31:29 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=561d2222
+2026-09-05T23:31:52 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T23:32:30 [INFO] [task_runner] Starting task runner session with PID 10353
+2026-09-05T23:32:31 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=7799d516
+2026-09-05T23:32:38 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T23:35:02 [INFO] [task_runner] Starting task runner session with PID 11132
+2026-09-05T23:35:03 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=390b02f3
+2026-09-05T23:35:11 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T23:39:21 [INFO] [task_runner] Starting task runner session with PID 12600
+2026-09-05T23:39:22 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=49a68179
+2026-09-05T23:39:29 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T23:44:38 [INFO] [task_runner] Starting task runner session with PID 13899
+2026-09-05T23:44:38 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T23:44:38 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T23:44:38 [INFO] [task_runner] Starting task runner session with PID 13899
+2026-09-05T23:44:38 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T23:44:38 [INFO] [task_runner] Starting task runner session with PID 13899
+2026-09-05T23:44:38 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T23:44:38 [INFO] [task_runner] Starting task runner session with PID 13899
+2026-09-05T23:44:38 [INFO] [task_runner] Sandbox initialised: owner=testowner run_id=<MagicMock name='mock.run_id' id='4440531568'>
+2026-09-05T23:44:38 [INFO] [task_runner] Starting task runner session with PID 13899
+2026-09-05T23:45:24 [INFO] [task_runner] Starting task runner session with PID 14082
+2026-09-05T23:45:24 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T23:46:08 [INFO] [task_runner] Starting task runner session with PID 14337
+2026-09-05T23:46:09 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=599c3586
+2026-09-05T23:46:17 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T23:50:08 [INFO] [task_runner] Starting task runner session with PID 15485
+2026-09-05T23:50:10 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=ac40f57a
+2026-09-05T23:50:18 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T23:50:36 [INFO] [task_runner] Starting task runner session with PID 15741
+2026-09-05T23:50:38 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=ef298eee
+2026-09-05T23:50:46 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T23:54:25 [INFO] [task_runner] Starting task runner session with PID 17094
+2026-09-05T23:54:27 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=088f8269
+2026-09-05T23:54:34 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T23:55:02 [INFO] [task_runner] Starting task runner session with PID 17395
+2026-09-05T23:55:03 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=ff0e56c6
+2026-09-05T23:55:10 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T23:55:14 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T23:55:17 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T23:55:20 [INFO] [task_runner] Executing task task_04_create_branch_and_issue (attempt 1/1)
+2026-09-05T23:55:26 [INFO] [task_runner] Executing task task_05_create_issue_and_comment (attempt 1/1)
+2026-09-05T23:55:45 [INFO] [task_runner] Starting task runner session with PID 17976
+2026-09-05T23:55:46 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=2da7434b
+2026-09-05T23:55:53 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-05T23:56:06 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-05T23:56:09 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-05T23:56:12 [INFO] [task_runner] Executing task task_04_create_branch_and_issue (attempt 1/1)
+2026-09-06T00:00:27 [INFO] [task_runner] Starting task runner session with PID 19551
+2026-09-06T00:00:28 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=3582f5cb
+2026-09-06T00:00:37 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T00:00:46 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T00:03:45 [INFO] [task_runner] Starting task runner session with PID 20398
+2026-09-06T00:03:46 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=ad4d8ebd
+2026-09-06T00:03:57 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T00:16:39 [INFO] [task_runner] Starting task runner session with PID 24058
+2026-09-06T00:16:39 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T00:16:39 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T00:16:39 [INFO] [task_runner] Starting task runner session with PID 24058
+2026-09-06T00:16:39 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T00:16:39 [INFO] [task_runner] Starting task runner session with PID 24058
+2026-09-06T00:16:39 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T00:16:39 [INFO] [task_runner] Starting task runner session with PID 24058
+2026-09-06T00:16:39 [INFO] [task_runner] Sandbox initialised: owner=testowner run_id=<MagicMock name='mock.run_id' id='4442694256'>
+2026-09-06T00:16:39 [INFO] [task_runner] Starting task runner session with PID 24058
+2026-09-06T00:20:54 [INFO] [task_runner] Starting task runner session with PID 25251
+2026-09-06T00:20:55 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=7ebe8709
+2026-09-06T00:21:05 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T00:22:01 [INFO] [task_runner] Starting task runner session with PID 25706
+2026-09-06T00:22:02 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=e251a729
+2026-09-06T00:22:11 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T00:22:42 [INFO] [task_runner] Starting task runner session with PID 26214
+2026-09-06T00:22:43 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=d7e3457c
+2026-09-06T00:22:53 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T00:23:04 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T00:23:16 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-06T00:23:30 [INFO] [task_runner] Executing task task_04_create_branch_and_issue (attempt 1/1)
+2026-09-06T00:23:54 [INFO] [task_runner] Executing task task_05_create_issue_and_comment (attempt 1/1)
+2026-09-06T00:42:40 [INFO] [task_runner] Starting task runner session with PID 31171
+2026-09-06T00:42:41 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=77ee687d
+2026-09-06T00:42:52 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T00:43:04 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T00:43:14 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-06T00:43:25 [INFO] [task_runner] Executing task task_04_create_branch_and_issue (attempt 1/1)
+2026-09-06T00:43:49 [INFO] [task_runner] Executing task task_05_create_issue_and_comment (attempt 1/1)
+2026-09-06T00:43:58 [INFO] [task_runner] Executing task task_06_create_and_update_issue (attempt 1/1)
+2026-09-06T00:44:07 [INFO] [task_runner] Executing task task_07_create_branch_and_pr (attempt 1/1)
+2026-09-06T00:59:41 [INFO] [task_runner] Starting task runner session with PID 35237
+2026-09-06T00:59:41 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T00:59:41 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T00:59:41 [INFO] [task_runner] Starting task runner session with PID 35237
+2026-09-06T00:59:41 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T00:59:41 [INFO] [task_runner] Starting task runner session with PID 35237
+2026-09-06T00:59:41 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T00:59:41 [INFO] [task_runner] Starting task runner session with PID 35237
+2026-09-06T00:59:41 [INFO] [task_runner] Sandbox initialised: owner=testowner run_id=<MagicMock name='mock.run_id' id='4471054960'>
+2026-09-06T00:59:41 [INFO] [task_runner] Starting task runner session with PID 35237
+2026-09-06T01:02:51 [INFO] [task_runner] Starting task runner session with PID 36011
+2026-09-06T01:02:51 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T01:02:51 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T01:02:51 [INFO] [task_runner] Starting task runner session with PID 36011
+2026-09-06T01:02:51 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T01:02:51 [INFO] [task_runner] Starting task runner session with PID 36011
+2026-09-06T01:02:51 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T01:02:51 [INFO] [task_runner] Starting task runner session with PID 36011
+2026-09-06T01:02:51 [INFO] [task_runner] Sandbox initialised: owner=testowner run_id=<MagicMock name='mock.run_id' id='4435330112'>
+2026-09-06T01:02:51 [INFO] [task_runner] Starting task runner session with PID 36011
+2026-09-06T01:03:18 [INFO] [task_runner] Starting task runner session with PID 36115
+2026-09-06T01:03:18 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T01:03:18 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T01:03:18 [INFO] [task_runner] Starting task runner session with PID 36115
+2026-09-06T01:03:18 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T01:03:18 [INFO] [task_runner] Starting task runner session with PID 36115
+2026-09-06T01:03:18 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T01:03:18 [INFO] [task_runner] Starting task runner session with PID 36115
+2026-09-06T01:03:18 [INFO] [task_runner] Sandbox initialised: owner=testowner run_id=<MagicMock name='mock.run_id' id='4497267008'>
+2026-09-06T01:03:18 [INFO] [task_runner] Starting task runner session with PID 36115
+2026-09-06T01:03:25 [INFO] [task_runner] Starting task runner session with PID 36150
+2026-09-06T01:03:25 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T01:03:25 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T01:03:27 [INFO] [task_runner] Starting task runner session with PID 36159
+2026-09-06T10:05:44 [INFO] [task_runner] Starting task runner session with PID 8315
+2026-09-06T10:05:44 [INFO] [task_runner] Starting task runner session with PID 8315
+2026-09-06T10:05:44 [INFO] [task_runner] Starting task runner session with PID 8315
+2026-09-06T10:05:44 [INFO] [task_runner] Starting task runner session with PID 8315
+2026-09-06T10:05:44 [INFO] [task_runner] Starting task runner session with PID 8315
+2026-09-06T10:06:03 [INFO] [task_runner] Starting task runner session with PID 8394
+2026-09-06T10:06:03 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T10:06:03 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T10:06:03 [INFO] [task_runner] Starting task runner session with PID 8394
+2026-09-06T10:06:03 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T10:06:03 [INFO] [task_runner] Starting task runner session with PID 8394
+2026-09-06T10:06:03 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T10:06:03 [INFO] [task_runner] Starting task runner session with PID 8394
+2026-09-06T10:06:03 [INFO] [task_runner] Sandbox initialised: owner=testowner run_id=<MagicMock name='mock.run_id' id='4502454352'>
+2026-09-06T10:06:03 [INFO] [task_runner] Starting task runner session with PID 8394
+2026-09-06T10:11:23 [INFO] [task_runner] Starting task runner session with PID 9658
+2026-09-06T10:11:23 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T10:11:23 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T10:11:23 [INFO] [task_runner] Starting task runner session with PID 9658
+2026-09-06T10:11:23 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T10:11:23 [INFO] [task_runner] Starting task runner session with PID 9658
+2026-09-06T10:11:23 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T10:11:23 [INFO] [task_runner] Starting task runner session with PID 9658
+2026-09-06T10:11:23 [INFO] [task_runner] Sandbox initialised: owner=testowner run_id=<MagicMock name='mock.run_id' id='4482351520'>
+2026-09-06T10:11:23 [INFO] [task_runner] Starting task runner session with PID 9658
+2026-09-06T10:13:38 [INFO] [task_runner] Starting task runner session with PID 10196
+2026-09-06T10:13:38 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T10:13:38 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T10:13:38 [INFO] [task_runner] Starting task runner session with PID 10196
+2026-09-06T10:13:38 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T10:13:38 [INFO] [task_runner] Starting task runner session with PID 10196
+2026-09-06T10:13:38 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T10:13:38 [INFO] [task_runner] Starting task runner session with PID 10196
+2026-09-06T10:13:38 [INFO] [task_runner] Sandbox initialised: owner=testowner run_id=<MagicMock name='mock.run_id' id='4507156560'>
+2026-09-06T10:13:38 [INFO] [task_runner] Starting task runner session with PID 10196
+2026-09-06T10:27:15 [INFO] [task_runner] Starting task runner session with PID 13363
+2026-09-06T10:27:15 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T10:27:15 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T10:27:15 [INFO] [task_runner] Starting task runner session with PID 13363
+2026-09-06T10:27:15 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T10:27:15 [INFO] [task_runner] Starting task runner session with PID 13363
+2026-09-06T10:27:15 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T10:27:15 [INFO] [task_runner] Starting task runner session with PID 13363
+2026-09-06T10:27:15 [INFO] [task_runner] Sandbox initialised: owner=testowner run_id=<MagicMock name='mock.run_id' id='4436021936'>
+2026-09-06T10:27:15 [INFO] [task_runner] Starting task runner session with PID 13363
+2026-09-06T12:39:30 [INFO] [task_runner] Starting task runner session with PID 38256
+2026-09-06T12:39:30 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T12:39:30 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T12:39:30 [INFO] [task_runner] Starting task runner session with PID 38256
+2026-09-06T12:39:30 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T12:39:30 [INFO] [task_runner] Starting task runner session with PID 38256
+2026-09-06T12:39:30 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T12:39:30 [INFO] [task_runner] Starting task runner session with PID 38256
+2026-09-06T12:39:30 [INFO] [task_runner] Sandbox initialised: owner=testowner run_id=<MagicMock name='mock.run_id' id='4543877808'>
+2026-09-06T12:39:30 [INFO] [task_runner] Starting task runner session with PID 38256
+2026-09-06T12:41:06 [INFO] [task_runner] Starting task runner session with PID 38640
+2026-09-06T12:41:06 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T12:41:06 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T12:41:06 [INFO] [task_runner] Starting task runner session with PID 38640
+2026-09-06T12:41:06 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T12:41:06 [INFO] [task_runner] Starting task runner session with PID 38640
+2026-09-06T12:41:06 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T12:41:06 [INFO] [task_runner] Starting task runner session with PID 38640
+2026-09-06T12:41:06 [INFO] [task_runner] Sandbox initialised: owner=testowner run_id=<MagicMock name='mock.run_id' id='4500820656'>
+2026-09-06T12:41:06 [INFO] [task_runner] Starting task runner session with PID 38640
+2026-09-06T12:41:10 [INFO] [task_runner] Starting task runner session with PID 38661
+2026-09-06T12:41:10 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T12:41:10 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T12:41:10 [INFO] [task_runner] Starting task runner session with PID 38661
+2026-09-06T12:41:10 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T12:41:10 [INFO] [task_runner] Starting task runner session with PID 38661
+2026-09-06T12:41:10 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T12:41:10 [INFO] [task_runner] Starting task runner session with PID 38661
+2026-09-06T12:41:10 [INFO] [task_runner] Sandbox initialised: owner=testowner run_id=<MagicMock name='mock.run_id' id='4474491568'>
+2026-09-06T12:41:10 [INFO] [task_runner] Starting task runner session with PID 38661
+2026-09-06T12:41:14 [INFO] [task_runner] Starting task runner session with PID 38680
+2026-09-06T12:41:14 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T12:41:14 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T12:41:14 [INFO] [task_runner] Starting task runner session with PID 38680
+2026-09-06T12:41:14 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T12:41:14 [INFO] [task_runner] Starting task runner session with PID 38680
+2026-09-06T12:41:14 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T12:41:14 [INFO] [task_runner] Starting task runner session with PID 38680
+2026-09-06T12:41:14 [INFO] [task_runner] Sandbox initialised: owner=testowner run_id=<MagicMock name='mock.run_id' id='4539683504'>
+2026-09-06T12:41:14 [INFO] [task_runner] Starting task runner session with PID 38680
+2026-09-06T12:41:38 [INFO] [task_runner] Starting task runner session with PID 38772
+2026-09-06T12:41:38 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T12:41:38 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T12:41:38 [INFO] [task_runner] Starting task runner session with PID 38772
+2026-09-06T12:41:38 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T12:41:38 [INFO] [task_runner] Starting task runner session with PID 38772
+2026-09-06T12:41:38 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T12:41:38 [INFO] [task_runner] Starting task runner session with PID 38772
+2026-09-06T12:41:38 [INFO] [task_runner] Sandbox initialised: owner=testowner run_id=<MagicMock name='mock.run_id' id='4500917952'>
+2026-09-06T12:41:38 [INFO] [task_runner] Starting task runner session with PID 38772
+2026-09-06T12:43:41 [INFO] [task_runner] Starting task runner session with PID 39297
+2026-09-06T12:43:41 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T12:43:41 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T12:43:41 [INFO] [task_runner] Starting task runner session with PID 39297
+2026-09-06T12:43:41 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T12:43:41 [INFO] [task_runner] Starting task runner session with PID 39297
+2026-09-06T12:43:41 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T12:43:41 [INFO] [task_runner] Starting task runner session with PID 39297
+2026-09-06T12:43:41 [INFO] [task_runner] Sandbox initialised: owner=testowner run_id=<MagicMock name='mock.run_id' id='4471787536'>
+2026-09-06T12:43:41 [INFO] [task_runner] Starting task runner session with PID 39297
+2026-09-06T12:48:42 [INFO] [task_runner] Starting task runner session with PID 40815
+2026-09-06T12:48:43 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=3a08e3fa
+2026-09-06T12:48:59 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T12:49:10 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T12:49:19 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-06T12:49:30 [INFO] [task_runner] Executing task task_04_create_branch_and_issue (attempt 1/1)
+2026-09-06T13:00:11 [INFO] [task_runner] Starting task runner session with PID 43559
+2026-09-06T13:00:11 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:00:16 [INFO] [task_runner] Starting task runner session with PID 43580
+2026-09-06T13:00:16 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:00:16 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T13:00:16 [INFO] [task_runner] Starting task runner session with PID 43580
+2026-09-06T13:00:16 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:00:16 [INFO] [task_runner] Starting task runner session with PID 43580
+2026-09-06T13:00:16 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:00:16 [INFO] [task_runner] Starting task runner session with PID 43580
+2026-09-06T13:00:16 [INFO] [task_runner] Sandbox initialised: owner=testowner run_id=<MagicMock name='mock.run_id' id='4441447056'>
+2026-09-06T13:00:16 [INFO] [task_runner] Starting task runner session with PID 43580
+2026-09-06T13:00:21 [INFO] [task_runner] Starting task runner session with PID 43603
+2026-09-06T13:00:21 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:00:21 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T13:00:21 [INFO] [task_runner] Starting task runner session with PID 43603
+2026-09-06T13:00:21 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:00:21 [INFO] [task_runner] Starting task runner session with PID 43603
+2026-09-06T13:00:21 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:00:21 [INFO] [task_runner] Starting task runner session with PID 43603
+2026-09-06T13:00:21 [INFO] [task_runner] Sandbox initialised: owner=testowner run_id=<MagicMock name='mock.run_id' id='4536962752'>
+2026-09-06T13:00:21 [INFO] [task_runner] Starting task runner session with PID 43603
+2026-09-06T13:00:35 [INFO] [task_runner] Starting task runner session with PID 43670
+2026-09-06T13:00:35 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:00:35 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T13:00:35 [INFO] [task_runner] Starting task runner session with PID 43670
+2026-09-06T13:00:35 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:00:35 [INFO] [task_runner] Starting task runner session with PID 43670
+2026-09-06T13:00:35 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:00:35 [INFO] [task_runner] Starting task runner session with PID 43670
+2026-09-06T13:00:35 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:00:35 [INFO] [task_runner] Starting task runner session with PID 43670
+2026-09-06T13:00:35 [INFO] [task_runner] Sandbox initialised: owner=testowner run_id=<MagicMock name='mock.run_id' id='4511931360'>
+2026-09-06T13:00:35 [INFO] [task_runner] Starting task runner session with PID 43670
+2026-09-06T13:00:40 [INFO] [task_runner] Starting task runner session with PID 43685
+2026-09-06T13:00:40 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:00:40 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T13:00:40 [INFO] [task_runner] Starting task runner session with PID 43685
+2026-09-06T13:00:40 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:00:40 [INFO] [task_runner] Starting task runner session with PID 43685
+2026-09-06T13:00:40 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:00:40 [INFO] [task_runner] Starting task runner session with PID 43685
+2026-09-06T13:00:40 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:00:40 [INFO] [task_runner] Starting task runner session with PID 43685
+2026-09-06T13:00:40 [INFO] [task_runner] Sandbox initialised: owner=testowner run_id=<MagicMock name='mock.run_id' id='4531457728'>
+2026-09-06T13:00:40 [INFO] [task_runner] Starting task runner session with PID 43685
+2026-09-06T13:01:19 [INFO] [task_runner] Starting task runner session with PID 43858
+2026-09-06T13:01:20 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=1d9beb7d
+2026-09-06T13:01:20 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:02:30 [INFO] [task_runner] Starting task runner session with PID 44159
+2026-09-06T13:02:31 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=9cf67f29
+2026-09-06T13:02:31 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:02:56 [INFO] [task_runner] Starting task runner session with PID 44260
+2026-09-06T13:02:56 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:02:56 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T13:02:56 [INFO] [task_runner] Starting task runner session with PID 44260
+2026-09-06T13:02:56 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:02:56 [INFO] [task_runner] Starting task runner session with PID 44260
+2026-09-06T13:02:56 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:02:56 [INFO] [task_runner] Starting task runner session with PID 44260
+2026-09-06T13:02:56 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:02:56 [INFO] [task_runner] Starting task runner session with PID 44260
+2026-09-06T13:02:56 [INFO] [task_runner] Sandbox initialised: owner=testowner run_id=<MagicMock name='mock.run_id' id='4466351408'>
+2026-09-06T13:02:56 [INFO] [task_runner] Starting task runner session with PID 44260
+2026-09-06T13:06:38 [INFO] [task_runner] Starting task runner session with PID 45399
+2026-09-06T13:06:39 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=90ff0103
+2026-09-06T13:06:51 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:07:01 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T13:07:11 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-06T13:07:21 [INFO] [task_runner] Executing task task_04_create_branch_and_issue (attempt 1/1)
+2026-09-06T13:07:41 [INFO] [task_runner] Executing task task_05_create_issue_and_comment (attempt 1/1)
+2026-09-06T13:21:04 [INFO] [task_runner] Starting task runner session with PID 49287
+2026-09-06T13:21:04 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:21:04 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T13:21:04 [INFO] [task_runner] Starting task runner session with PID 49287
+2026-09-06T13:21:04 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:21:04 [INFO] [task_runner] Starting task runner session with PID 49287
+2026-09-06T13:21:04 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:21:04 [INFO] [task_runner] Starting task runner session with PID 49287
+2026-09-06T13:21:04 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:21:04 [INFO] [task_runner] Starting task runner session with PID 49287
+2026-09-06T13:21:04 [INFO] [task_runner] Sandbox initialised: owner=testowner run_id=<MagicMock name='mock.run_id' id='4514374928'>
+2026-09-06T13:21:04 [INFO] [task_runner] Starting task runner session with PID 49287
+2026-09-06T13:21:08 [INFO] [task_runner] Starting task runner session with PID 49310
+2026-09-06T13:21:08 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:21:08 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T13:21:08 [INFO] [task_runner] Starting task runner session with PID 49310
+2026-09-06T13:21:08 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:21:08 [INFO] [task_runner] Starting task runner session with PID 49310
+2026-09-06T13:21:08 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:21:08 [INFO] [task_runner] Starting task runner session with PID 49310
+2026-09-06T13:21:08 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:21:08 [INFO] [task_runner] Starting task runner session with PID 49310
+2026-09-06T13:21:08 [INFO] [task_runner] Sandbox initialised: owner=testowner run_id=<MagicMock name='mock.run_id' id='4476954208'>
+2026-09-06T13:21:08 [INFO] [task_runner] Starting task runner session with PID 49310
+2026-09-06T13:21:50 [INFO] [task_runner] Starting task runner session with PID 49485
+2026-09-06T13:21:50 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:21:50 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T13:21:50 [INFO] [task_runner] Starting task runner session with PID 49485
+2026-09-06T13:21:50 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:21:50 [INFO] [task_runner] Starting task runner session with PID 49485
+2026-09-06T13:21:50 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:21:50 [INFO] [task_runner] Starting task runner session with PID 49485
+2026-09-06T13:21:50 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T13:21:50 [INFO] [task_runner] Starting task runner session with PID 49485
+2026-09-06T13:21:50 [INFO] [task_runner] Sandbox initialised: owner=testowner run_id=<MagicMock name='mock.run_id' id='4535217056'>
+2026-09-06T13:21:50 [INFO] [task_runner] Starting task runner session with PID 49485
+2026-09-06T14:33:43 [INFO] [task_runner] Starting task runner session with PID 54163
+2026-09-06T14:33:44 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=4ce4e507
+2026-09-06T14:33:56 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T14:34:05 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T14:34:14 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-06T14:34:24 [INFO] [task_runner] Executing task task_04_create_branch_and_issue (attempt 1/1)
+2026-09-06T14:34:44 [INFO] [task_runner] Executing task task_05_create_issue_and_comment (attempt 1/1)
+2026-09-06T14:37:28 [INFO] [task_runner] Starting task runner session with PID 55106
+2026-09-06T14:37:28 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T14:37:28 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T14:37:28 [INFO] [task_runner] Starting task runner session with PID 55106
+2026-09-06T14:37:28 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T14:37:28 [INFO] [task_runner] Starting task runner session with PID 55106
+2026-09-06T14:37:28 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T14:37:28 [INFO] [task_runner] Starting task runner session with PID 55106
+2026-09-06T14:37:28 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T14:37:28 [INFO] [task_runner] Starting task runner session with PID 55106
+2026-09-06T14:37:28 [INFO] [task_runner] Sandbox initialised: owner=testowner run_id=<MagicMock name='mock.run_id' id='4505575712'>
+2026-09-06T14:37:28 [INFO] [task_runner] Starting task runner session with PID 55106
+2026-09-06T14:37:42 [INFO] [task_runner] Starting task runner session with PID 55165
+2026-09-06T14:37:43 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=5e64978b
+2026-09-06T14:37:43 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-06T14:38:10 [INFO] [task_runner] Starting task runner session with PID 55272
+2026-09-06T14:38:11 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=cecdcf35
+2026-09-06T14:38:11 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-06T14:47:23 [INFO] [task_runner] Starting task runner session with PID 57695
+2026-09-06T14:47:24 [INFO] [task_runner] Sandbox initialised: owner=bharath-rdy4 run_id=183a7022
+2026-09-06T14:47:37 [INFO] [task_runner] Executing task task_01_create_issue (attempt 1/1)
+2026-09-06T14:47:48 [INFO] [task_runner] Executing task task_02_create_issue_with_label (attempt 1/1)
+2026-09-06T14:47:57 [INFO] [task_runner] Executing task task_03_create_branch (attempt 1/1)
+2026-09-06T14:48:07 [INFO] [task_runner] Executing task task_04_create_branch_and_issue (attempt 1/1)
+2026-09-06T14:48:28 [INFO] [task_runner] Executing task task_05_create_issue_and_comment (attempt 1/1)

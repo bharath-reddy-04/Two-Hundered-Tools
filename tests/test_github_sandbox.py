@@ -63,7 +63,8 @@ except ModuleNotFoundError:  # pragma: no cover
             msg = "integration test — set GITHUB_TOKEN/GITHUB_OWNER and use pytest -m integration"
             skip_deco = unittest.skip(msg)
             if isinstance(fn_or_cls, type):
-                # Decorate each test method on the class
+                setattr(fn_or_cls, "__unittest_skip__", True)
+                setattr(fn_or_cls, "__unittest_skip_why__", msg)
                 for attr in list(vars(fn_or_cls)):
                     if attr.startswith("test"):
                         setattr(fn_or_cls, attr, skip_deco(getattr(fn_or_cls, attr)))
@@ -523,6 +524,175 @@ class TestRepr:
         sb = _mock_gh(owner="myowner")
         r = repr(sb)
         assert "myowner" in r
+
+
+# ---------------------------------------------------------------------------
+# Sandbox Reset & Deterministic State Unit Tests
+# ---------------------------------------------------------------------------
+
+
+class TestSandboxCleaning(unittest.TestCase):
+    """Unit tests for clean_issues, clean_branches, clean_prs, clean_eval_repos, and clean_sandbox."""
+
+    def setUp(self):
+        self.mock_gh = MagicMock()
+        self.mock_user = MagicMock()
+        self.mock_gh.get_user.return_value = self.mock_user
+
+        with patch.dict(os.environ, {"GITHUB_TOKEN": "tok_mock", "GITHUB_OWNER": "testowner"}):
+            with patch("github_sandbox.Github", return_value=self.mock_gh):
+                self.sb = GitHubSandbox(token="tok_mock", owner="testowner")
+
+    def test_clean_issues_archives_and_closes_matching_issues(self):
+        mock_repo = MagicMock()
+        mock_repo.name = "eval-sandbox-repo"
+
+        issue_1 = MagicMock(number=1, title="eval-issue-001: Login bug", state="open")
+        issue_2 = MagicMock(number=2, title="Unrelated issue", state="open")
+        issue_3 = MagicMock(number=3, title="[ARCHIVED] eval-issue-003", state="open")
+        mock_repo.get_issues.return_value = [issue_1, issue_2, issue_3]
+
+        cleaned = self.sb.clean_issues(mock_repo, prefix="eval-")
+
+        self.assertEqual(cleaned, [1])
+        issue_1.edit.assert_called_once_with(title="[ARCHIVED] eval-issue-001: Login bug", state="closed")
+        issue_2.edit.assert_not_called()
+        issue_3.edit.assert_called_once_with(state="closed")
+
+    def test_clean_branches_protects_default_and_deletes_matching(self):
+        mock_repo = MagicMock()
+        mock_repo.name = "eval-sandbox-repo"
+        mock_repo.default_branch = "main"
+
+        b_main = MagicMock()
+        b_main.name = "main"
+        b_master = MagicMock()
+        b_master.name = "master"
+        b_eval = MagicMock()
+        b_eval.name = "eval-branch-003-login"
+        b_other = MagicMock()
+        b_other.name = "feature-ui"
+        mock_repo.get_branches.return_value = [b_main, b_master, b_eval, b_other]
+
+        mock_ref = MagicMock()
+        mock_repo.get_git_ref.return_value = mock_ref
+
+        deleted = self.sb.clean_branches(mock_repo, prefix="eval-")
+
+        self.assertEqual(deleted, ["eval-branch-003-login"])
+        mock_repo.get_git_ref.assert_called_once_with("heads/eval-branch-003-login")
+        mock_ref.delete.assert_called_once()
+
+    def test_clean_pull_requests_archives_and_closes(self):
+        mock_repo = MagicMock()
+        mock_repo.name = "eval-sandbox-repo"
+
+        pr_1 = MagicMock(number=10, title="eval-pr-007: Feature", state="open")
+        pr_1.head.ref = "eval-branch-007"
+        pr_2 = MagicMock(number=11, title="Feature UI", state="open")
+        pr_2.head.ref = "feature-ui"
+        pr_3 = MagicMock(number=12, title="[ARCHIVED] Old PR", state="closed")
+        pr_3.head.ref = "eval-branch-old"
+        mock_repo.get_pulls.return_value = [pr_1, pr_2, pr_3]
+
+        cleaned = self.sb.clean_pull_requests(mock_repo, prefix="eval-")
+
+        self.assertEqual(cleaned, [10])
+        pr_1.edit.assert_called_once_with(title="[ARCHIVED] eval-pr-007: Feature", state="closed")
+        pr_2.edit.assert_not_called()
+        pr_3.edit.assert_not_called()
+
+    def test_clean_eval_repos_excludes_protected_and_target_repos(self):
+        repo_1 = MagicMock()
+        repo_1.name = "eval-repo-012-login"
+        repo_1.full_name = "testowner/eval-repo-012-login"
+
+        repo_2 = MagicMock()
+        repo_2.name = "eval-sandbox-repo"
+        repo_2.full_name = "testowner/eval-sandbox-repo"
+
+        repo_3 = MagicMock()
+        repo_3.name = "Two-Hundered-Tools"
+        repo_3.full_name = "testowner/Two-Hundered-Tools"
+
+        repo_4 = MagicMock()
+        repo_4.name = "other-production-repo"
+        repo_4.full_name = "testowner/other-production-repo"
+
+        self.mock_user.get_repos.return_value = [repo_1, repo_2, repo_3, repo_4]
+
+        deleted = self.sb.clean_eval_repos(prefix="eval-", exclude_repos=["eval-sandbox-repo"])
+
+        self.assertEqual(deleted, ["eval-repo-012-login"])
+        repo_1.delete.assert_called_once()
+        repo_2.delete.assert_not_called()
+        repo_3.delete.assert_not_called()
+        repo_4.delete.assert_not_called()
+
+    def test_clean_repo_state(self):
+        mock_repo = MagicMock()
+        mock_repo.name = "eval-sandbox-repo"
+        mock_repo.default_branch = "main"
+
+        issue = MagicMock(number=1, title="eval-issue-001", state="open")
+        mock_repo.get_issues.return_value = [issue]
+
+        branch = MagicMock()
+        branch.name = "eval-branch-1"
+        mock_repo.get_branches.return_value = [branch]
+        mock_ref = MagicMock()
+        mock_repo.get_git_ref.return_value = mock_ref
+
+        pr = MagicMock(number=10, title="eval-pr-1", state="open")
+        pr.head.ref = "eval-branch-1"
+        mock_repo.get_pulls.return_value = [pr]
+
+        res = self.sb.clean_repo_state(mock_repo, prefix="eval-")
+
+        self.assertEqual(res["repo"], "eval-sandbox-repo")
+        self.assertEqual(res["issues_cleaned"], [1])
+        self.assertEqual(res["branches_deleted"], ["eval-branch-1"])
+        self.assertEqual(res["pull_requests_closed"], [10])
+
+    def test_clean_task_state_targeted(self):
+        mock_repo = MagicMock()
+        mock_repo.name = "eval-sandbox-repo"
+        mock_repo.default_branch = "main"
+
+        issue = MagicMock(number=42, title="eval-issue-001: Login bug", state="open")
+        mock_repo.get_issues.return_value = [issue]
+
+        branch = MagicMock()
+        branch.name = "eval-branch-003-login"
+        mock_repo.get_branches.return_value = [branch]
+        mock_ref = MagicMock()
+        mock_repo.get_git_ref.return_value = mock_ref
+
+        task = {
+            "task_id": "task_01_create_issue",
+            "expected_state": {
+                "issue": {"title": "eval-issue-001: Login bug", "state": "open"},
+                "branch": {"name": "eval-branch-003-login"},
+            },
+        }
+
+        res = self.sb.clean_task_state(mock_repo, task)
+
+        self.assertEqual(res["issues_archived"], [42])
+        self.assertEqual(res["branches_deleted"], ["eval-branch-003-login"])
+        issue.edit.assert_called_once_with(title="[ARCHIVED] eval-issue-001: Login bug", state="closed")
+        mock_ref.delete.assert_called_once()
+
+    def test_clean_sandbox_orchestration(self):
+        with patch.object(self.sb, "clean_eval_repos", return_value=["eval-repo-old"]) as mock_cer:
+            with patch.object(self.sb, "repo_exists", return_value=True):
+                with patch.object(self.sb, "clean_repo_state", return_value={"issues_cleaned": [1]}) as mock_crs:
+                    summary = self.sb.clean_sandbox(target_repo="myowner/eval-sandbox-repo", prefix="eval-")
+
+                    mock_cer.assert_called_once()
+                    mock_crs.assert_called_once_with("myowner/eval-sandbox-repo", prefix="eval-")
+                    self.assertEqual(summary["repos_deleted"], ["eval-repo-old"])
+                    self.assertEqual(summary["repo_state"]["issues_cleaned"], [1])
 
 
 # ---------------------------------------------------------------------------

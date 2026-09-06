@@ -53,6 +53,8 @@ except ModuleNotFoundError:
             msg = "integration — needs GEMINI_API_KEY + GITHUB_TOKEN + GITHUB_OWNER"
             skip = unittest.skip(msg)
             if isinstance(fn_or_cls, type):
+                setattr(fn_or_cls, "__unittest_skip__", True)
+                setattr(fn_or_cls, "__unittest_skip_why__", msg)
                 for attr in list(vars(fn_or_cls)):
                     if attr.startswith("test"):
                         setattr(fn_or_cls, attr, skip(getattr(fn_or_cls, attr)))

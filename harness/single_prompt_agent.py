@@ -36,7 +36,7 @@ Required environment variables (load from .env or shell):
     GITHUB_OWNER      — GitHub account / org owning sandbox repos
 
 Optional:
-    GEMINI_MODEL      — defaults to "gemini-2.0-flash"
+    GEMINI_MODEL      — defaults to "gemini-3.6-flash"
     CATALOG_PATH      — path to operation_catalog.json
                         (defaults to schemas/operation_catalog.json
                          relative to this file's directory)
@@ -56,6 +56,11 @@ from pathlib import Path
 from typing import Any, Optional
 
 from dotenv import load_dotenv
+
+try:
+    from github_operations import execute_operation
+except ImportError:
+    from harness.github_operations import execute_operation
 
 load_dotenv()
 
@@ -143,6 +148,20 @@ _PARAM_REF_DESCRIPTIONS: dict[str, dict[str, Any]] = {
         "in": "path",
         "required": True,
         "description": "The git reference (branch, tag, or full ref like refs/heads/main).",
+        "schema": {"type": "string"},
+    },
+    "#/components/parameters/git-ref-only": {
+        "name": "ref",
+        "in": "path",
+        "required": True,
+        "description": "The git reference (e.g. heads/main or main).",
+        "schema": {"type": "string"},
+    },
+    "#/components/parameters/commit-ref": {
+        "name": "ref",
+        "in": "path",
+        "required": True,
+        "description": "The commit reference (commit SHA, branch name, or tag name).",
         "schema": {"type": "string"},
     },
     "#/components/parameters/basehead": {
@@ -421,286 +440,7 @@ def _execute_tool_call(
         The sandbox ``execute()`` result dict.
     """
     operation_id = op["operation_id"]
-    owner = sandbox._owner
-
-    def _repo(name=None):
-        repo_name = name or arguments.get("repo") or arguments.get("repository")
-        if not repo_name:
-            raise ValueError("'repo' argument is required for this operation.")
-        owner_name = arguments.get("owner")
-        if owner_name and "/" not in str(repo_name):
-            repo_name = f"{owner_name}/{repo_name}"
-        return sandbox.get_repo(repo_name)
-
-    dispatch: dict[str, Any] = {}
-
-    # ── repos ─────────────────────────────────────────────────────────────
-    if operation_id == "repos/create-for-authenticated-user":
-        dispatch[operation_id] = lambda: sandbox._gh.get_user(owner).create_repo(
-            name=arguments["name"],
-            description=arguments.get("description", ""),
-            private=arguments.get("private", True),
-            auto_init=arguments.get("auto_init", False),
-            has_issues=arguments.get("has_issues", True),
-            has_wiki=arguments.get("has_wiki", True),
-            has_projects=arguments.get("has_projects", True),
-        )
-    elif operation_id == "repos/get":
-        dispatch[operation_id] = lambda: _repo()
-    elif operation_id == "repos/update":
-        def _repos_update():
-            r = _repo()
-            kwargs = {}
-            for field in [
-                "name", "description", "homepage", "private",
-                "has_issues", "has_wiki", "has_projects",
-                "default_branch", "archived", "allow_squash_merge",
-                "allow_merge_commit", "allow_rebase_merge",
-                "allow_auto_merge", "delete_branch_on_merge",
-            ]:
-                if field in arguments:
-                    kwargs[field] = arguments[field]
-            r.edit(**kwargs)
-            return r
-        dispatch[operation_id] = _repos_update
-    elif operation_id == "repos/delete":
-        dispatch[operation_id] = lambda: _repo().delete()
-    elif operation_id == "repos/list-for-authenticated-user":
-        dispatch[operation_id] = lambda: list(sandbox._gh.get_user(owner).get_repos())
-    elif operation_id == "repos/list-collaborators":
-        dispatch[operation_id] = lambda: list(_repo().get_collaborators())
-    elif operation_id == "repos/add-collaborator":
-        dispatch[operation_id] = lambda: _repo().add_to_collaborators(
-            arguments["username"], permission=arguments.get("permission", "push")
-        )
-    elif operation_id == "repos/remove-collaborator":
-        dispatch[operation_id] = lambda: _repo().remove_from_collaborators(
-            arguments["username"]
-        )
-    elif operation_id == "repos/get-all-topics":
-        dispatch[operation_id] = lambda: _repo().get_topics()
-    elif operation_id == "repos/replace-all-topics":
-        dispatch[operation_id] = lambda: _repo().replace_topics(
-            arguments.get("names", [])
-        )
-
-    # ── branches / git refs ───────────────────────────────────────────────
-    elif operation_id == "repos/list-branches":
-        dispatch[operation_id] = lambda: list(_repo().get_branches())
-    elif operation_id == "repos/get-branch":
-        dispatch[operation_id] = lambda: _repo().get_branch(arguments["branch"])
-    elif operation_id == "git/create-ref":
-        dispatch[operation_id] = lambda: _repo().create_git_ref(
-            ref=arguments["ref"], sha=arguments["sha"]
-        )
-    elif operation_id == "git/delete-ref":
-        dispatch[operation_id] = lambda: _repo().get_git_ref(arguments["ref"]).delete()
-    elif operation_id == "repos/rename-branch":
-        dispatch[operation_id] = lambda: _repo().rename_branch(
-            arguments["branch"], arguments["new_name"]
-        )
-    elif operation_id == "repos/merge":
-        dispatch[operation_id] = lambda: _repo().merge(
-            arguments["base"], arguments["head"],
-            commit_message=arguments.get("commit_message", ""),
-        )
-    elif operation_id == "repos/compare-commits":
-        dispatch[operation_id] = lambda: _repo().compare(
-            arguments["base"], arguments["head"]
-        )
-
-    # ── contents ──────────────────────────────────────────────────────────
-    elif operation_id == "repos/get-content":
-        dispatch[operation_id] = lambda: _repo().get_contents(
-            arguments["path"], ref=arguments.get("ref")
-        )
-    elif operation_id == "repos/create-or-update-file-contents":
-        def _upsert_file():
-            r = _repo()
-            path = arguments["path"]
-            message = arguments.get("message", "Update file")
-            content = arguments.get("content", "")
-            sha = arguments.get("sha")
-            if sha:
-                return r.update_file(path, message, content, sha)
-            return r.create_file(path, message, content,
-                                 branch=arguments.get("branch", r.default_branch))
-        dispatch[operation_id] = _upsert_file
-    elif operation_id == "repos/delete-file":
-        dispatch[operation_id] = lambda: _repo().delete_file(
-            arguments["path"], arguments.get("message", "Delete file"),
-            arguments["sha"], branch=arguments.get("branch"),
-        )
-    elif operation_id == "repos/get-readme":
-        dispatch[operation_id] = lambda: _repo().get_readme()
-    elif operation_id == "repos/list-commits":
-        dispatch[operation_id] = lambda: list(_repo().get_commits(
-            sha=arguments.get("sha"), path=arguments.get("path")
-        ))
-    elif operation_id == "repos/get-commit":
-        dispatch[operation_id] = lambda: _repo().get_commit(arguments["commit_sha"])
-
-    # ── git database ──────────────────────────────────────────────────────
-    elif operation_id == "git/get-tree":
-        dispatch[operation_id] = lambda: _repo().get_git_tree(
-            arguments["tree_sha"], recursive=arguments.get("recursive")
-        )
-    elif operation_id == "git/get-blob":
-        dispatch[operation_id] = lambda: _repo().get_git_blob(arguments["file_sha"])
-    elif operation_id == "git/get-ref":
-        dispatch[operation_id] = lambda: _repo().get_git_ref(arguments["ref"])
-    elif operation_id == "git/list-matching-refs":
-        dispatch[operation_id] = lambda: list(
-            _repo().get_git_matching_refs(arguments["ref"])
-        )
-
-    # ── pull requests ─────────────────────────────────────────────────────
-    elif operation_id == "pulls/create":
-        dispatch[operation_id] = lambda: _repo().create_pull(
-            title=arguments.get("title", ""),
-            body=arguments.get("body", ""),
-            head=arguments["head"],
-            base=arguments["base"],
-            draft=arguments.get("draft", False),
-            maintainer_can_modify=arguments.get("maintainer_can_modify", True),
-        )
-    elif operation_id == "pulls/get":
-        dispatch[operation_id] = lambda: _repo().get_pull(arguments["pull_number"])
-    elif operation_id == "pulls/list":
-        dispatch[operation_id] = lambda: list(_repo().get_pulls(
-            state=arguments.get("state", "open"),
-            head=arguments.get("head"),
-            base=arguments.get("base"),
-            sort=arguments.get("sort", "created"),
-            direction=arguments.get("direction", "desc"),
-        ))
-    elif operation_id == "pulls/update":
-        def _update_pr():
-            pr = _repo().get_pull(arguments["pull_number"])
-            kwargs = {}
-            for field in ["title", "body", "state", "base", "maintainer_can_modify"]:
-                if field in arguments:
-                    kwargs[field] = arguments[field]
-            pr.edit(**kwargs)
-            return pr
-        dispatch[operation_id] = _update_pr
-    elif operation_id == "pulls/merge":
-        dispatch[operation_id] = lambda: _repo().get_pull(
-            arguments["pull_number"]
-        ).merge(
-            commit_title=arguments.get("commit_title", ""),
-            commit_message=arguments.get("commit_message", ""),
-            merge_method=arguments.get("merge_method", "merge"),
-        )
-    elif operation_id == "pulls/list-files":
-        dispatch[operation_id] = lambda: list(
-            _repo().get_pull(arguments["pull_number"]).get_files()
-        )
-    elif operation_id == "pulls/list-commits":
-        dispatch[operation_id] = lambda: list(
-            _repo().get_pull(arguments["pull_number"]).get_commits()
-        )
-    elif operation_id == "pulls/list-review-comments":
-        dispatch[operation_id] = lambda: list(
-            _repo().get_pull(arguments["pull_number"]).get_review_comments()
-        )
-
-    # ── issues ────────────────────────────────────────────────────────────
-    elif operation_id == "issues/create":
-        def _create_issue():
-            r = _repo()
-            kwargs: dict[str, Any] = {"title": arguments["title"]}
-            if "body" in arguments:
-                kwargs["body"] = arguments["body"]
-            if "labels" in arguments:
-                kwargs["labels"] = arguments["labels"]
-            if "assignees" in arguments:
-                kwargs["assignees"] = arguments["assignees"]
-            if "milestone" in arguments:
-                kwargs["milestone"] = arguments["milestone"]
-            return r.create_issue(**kwargs)
-        dispatch[operation_id] = _create_issue
-    elif operation_id == "issues/get":
-        dispatch[operation_id] = lambda: _repo().get_issue(arguments["issue_number"])
-    elif operation_id == "issues/list":
-        dispatch[operation_id] = lambda: list(_repo().get_issues(
-            state=arguments.get("state", "open"),
-            labels=arguments.get("labels", []),
-            assignee=arguments.get("assignee"),
-            milestone=arguments.get("milestone"),
-        ))
-    elif operation_id == "issues/update":
-        def _update_issue():
-            issue = _repo().get_issue(arguments["issue_number"])
-            kwargs = {}
-            for field in ["title", "body", "state", "labels", "assignees", "milestone"]:
-                if field in arguments:
-                    kwargs[field] = arguments[field]
-            issue.edit(**kwargs)
-            return issue
-        dispatch[operation_id] = _update_issue
-    elif operation_id == "issues/create-comment":
-        dispatch[operation_id] = lambda: _repo().get_issue(
-            arguments["issue_number"]
-        ).create_comment(arguments["body"])
-    elif operation_id == "issues/list-comments":
-        dispatch[operation_id] = lambda: list(
-            _repo().get_issue(arguments["issue_number"]).get_comments()
-        )
-    elif operation_id == "issues/lock":
-        dispatch[operation_id] = lambda: _repo().get_issue(
-            arguments["issue_number"]
-        ).lock(arguments.get("lock_reason", "off-topic"))
-
-    # ── Actions ──────────────────────────────────────────────────────────
-    elif operation_id == "actions/list-repo-workflows":
-        dispatch[operation_id] = lambda: list(_repo().get_workflows())
-    elif operation_id == "actions/list-workflow-runs-for-repo":
-        dispatch[operation_id] = lambda: list(_repo().get_workflow_runs())
-    elif operation_id == "actions/get-workflow-run":
-        dispatch[operation_id] = lambda: _repo().get_workflow_run(arguments["run_id"])
-    elif operation_id == "actions/create-workflow-dispatch":
-        dispatch[operation_id] = lambda: _repo().get_workflow(
-            arguments["workflow_id"]
-        ).create_dispatch(
-            ref=arguments.get("ref", "main"),
-            inputs=arguments.get("inputs", {}),
-        )
-    elif operation_id == "actions/cancel-workflow-run":
-        dispatch[operation_id] = lambda: _repo().get_workflow_run(
-            arguments["run_id"]
-        ).cancel()
-    elif operation_id == "actions/re-run-workflow":
-        dispatch[operation_id] = lambda: _repo().get_workflow_run(
-            arguments["run_id"]
-        ).rerun()
-    elif operation_id == "actions/re-run-workflow-failed-jobs":
-        dispatch[operation_id] = lambda: _repo().get_workflow_run(
-            arguments["run_id"]
-        ).rerun_failed_jobs()
-    elif operation_id == "actions/download-workflow-run-logs":
-        dispatch[operation_id] = lambda: _repo().get_workflow_run(
-            arguments["run_id"]
-        ).logs_url
-
-    # ── users ─────────────────────────────────────────────────────────────
-    elif operation_id == "users/get-authenticated":
-        dispatch[operation_id] = lambda: sandbox._gh.get_user()
-
-    # ── unknown ───────────────────────────────────────────────────────────
-    else:
-        return {
-            "success": False,
-            "operation": operation_id,
-            "error_type": "UNKNOWN_OPERATION",
-            "message": (
-                f"Operation '{operation_id}' is in the catalog but has no "
-                "execution handler in single_prompt_agent.py."
-            ),
-        }
-
-    fn = dispatch[operation_id]
-    return sandbox.execute(operation_id, fn)
+    return execute_operation(sandbox, operation_id, arguments)
 
 
 # ---------------------------------------------------------------------------
@@ -766,7 +506,7 @@ class AgentSession:
     catalog_path : str | Path, optional
         Override catalog location.
     model : str, optional
-        Gemini model name.  Defaults to GEMINI_MODEL env-var or "gemini-2.0-flash".
+        Gemini model name.  Defaults to GEMINI_MODEL env-var or "gemini-3.6-flash".
     """
 
     def __init__(
@@ -776,7 +516,7 @@ class AgentSession:
         model: Optional[str] = None,
     ) -> None:
         self.sandbox = sandbox
-        self.model = model or os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
+        self.model = model or os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
         self.fn_decls, self.op_index = load_tool_schemas(catalog_path)
         self._client = _get_gemini_client()
         logger.info(
@@ -1099,7 +839,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     parser.add_argument("--repo", "-r", help="Target repository in owner/repo format.")
     parser.add_argument(
         "--model", "-m", default=None,
-        help="Gemini model name (default: GEMINI_MODEL env-var or gemini-2.0-flash).",
+        help="Gemini model name (default: GEMINI_MODEL env-var or gemini-3.6-flash).",
     )
     parser.add_argument("--catalog", default=None,
                         help="Path to operation_catalog.json.")

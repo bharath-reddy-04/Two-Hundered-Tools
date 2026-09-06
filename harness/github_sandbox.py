@@ -182,6 +182,9 @@ class GitHubSandbox:
         # Unique identifier for this evaluation run
         self.run_id: str = uuid.uuid4().hex[:8]
 
+        # Default sandbox repository (eval-sandbox-repo)
+        self.default_repo: str = os.getenv("GITHUB_REPO", "eval-sandbox-repo")
+
         # Initialise PyGithub client once
         self._gh = Github(self._token)
 
@@ -244,12 +247,24 @@ class GitHubSandbox:
 
         Raises ``UnknownObjectException`` (404) if the repo does not exist.
         """
+        target_default = getattr(self, "default_repo", os.getenv("GITHUB_REPO", "eval-sandbox-repo"))
+        bare_name = repo_name.split("/")[-1] if "/" in repo_name else repo_name
+        if bare_name in ("test-repo-1", "test_repo_1", "repo-1", "repo_1"):
+            repo_name = target_default
+
         if "/" in repo_name:
             full_name = repo_name
         else:
             full_name = f"{self._owner}/{repo_name}"
         self._log(f"Fetching repo {full_name!r}")
-        return self._gh.get_repo(full_name)
+        try:
+            return self._gh.get_repo(full_name)
+        except UnknownObjectException:
+            default_full = f"{self._owner}/{target_default}" if "/" not in target_default else target_default
+            if full_name != default_full and bare_name in ("test-repo", "test_repo", "test-repository"):
+                self._log(f"Repo {full_name!r} not found, falling back to default {default_full!r}")
+                return self._gh.get_repo(default_full)
+            raise
 
     def repo_exists(self, repo_name: str) -> bool:
         """Return True if *repo_name* exists under the configured owner."""
@@ -277,7 +292,7 @@ class GitHubSandbox:
             name=repo_name,
             description=f"Evaluation sandbox | run_id={self.run_id}",
             private=private,
-            auto_init=False,  # we seed manually for full determinism
+            auto_init=True,
         )
         self._log(f"Created repository {repo_name!r}")
         return repo
@@ -307,7 +322,7 @@ class GitHubSandbox:
         """
         Establish a deterministic initial state in *repo*.
 
-        Creates:
+        Creates / updates:
         * SEED_FILES  — stable file contents (README.md, config.json)
         * SEED_ISSUES — stable issues (Fix login bug, Add dark mode)
 
@@ -317,18 +332,28 @@ class GitHubSandbox:
         repo_name = repo.name
         self._log(f"Seeding {repo_name!r}")
 
-        # Create seed files on the default branch
+        # Create or update seed files on the default branch
         for path, content in SEED_FILES.items():
             try:
-                repo.create_file(
-                    path=path,
-                    message=f"chore: seed {path} [eval run_id={self.run_id}]",
-                    content=content,
-                )
-                self._log(f"  Created file {path!r} in {repo_name!r}")
+                try:
+                    existing = repo.get_contents(path)
+                    repo.update_file(
+                        path=path,
+                        message=f"chore: update {path} [eval run_id={self.run_id}]",
+                        content=content,
+                        sha=existing.sha,
+                    )
+                    self._log(f"  Updated file {path!r} in {repo_name!r}")
+                except (UnknownObjectException, GithubException):
+                    repo.create_file(
+                        path=path,
+                        message=f"chore: seed {path} [eval run_id={self.run_id}]",
+                        content=content,
+                    )
+                    self._log(f"  Created file {path!r} in {repo_name!r}")
             except GithubException as exc:
                 self._log(
-                    f"  Failed to create {path!r} in {repo_name!r}: {exc}",
+                    f"  Failed to create/update {path!r} in {repo_name!r}: {exc}",
                     logging.ERROR,
                 )
                 raise
@@ -352,9 +377,415 @@ class GitHubSandbox:
 
         self._log(f"Seeded {repo_name!r}")
 
+    def _resolve_repo(self, repo_name_or_obj: Any):
+        """Internal helper to return a Repository object from name or instance."""
+        if hasattr(repo_name_or_obj, "get_issues") or hasattr(repo_name_or_obj, "get_branches"):
+            return repo_name_or_obj
+        if isinstance(repo_name_or_obj, str):
+            return self.get_repo(repo_name_or_obj)
+        return repo_name_or_obj
+
     # ------------------------------------------------------------------
-    # Reset
+    # Reset & Deterministic State Cleaning
     # ------------------------------------------------------------------
+
+    def clean_issues(
+        self,
+        repo_name_or_obj: Any,
+        prefix: Optional[str] = "eval-",
+        archive_prefix: str = "[ARCHIVED]",
+    ) -> list[int]:
+        """
+        Clean old evaluation issues from a repository.
+
+        To prevent 'AMBIGUOUS_RESOURCE' errors when verifier searches by title,
+        this method archives and closes matching issues. (GitHub REST API does
+        not support deleting issues via standard endpoints; renaming title + closing
+        guarantees that subsequent runs start with a unique, deterministic state).
+
+        Parameters
+        ----------
+        repo_name_or_obj : str | Repository
+            Repository name or PyGithub Repository object.
+        prefix : Optional[str]
+            Only issues whose title starts with or contains prefix are cleaned.
+            If None, cleans all non-archived issues.
+        archive_prefix : str
+            Prefix added to issue title upon archiving (default '[ARCHIVED]').
+
+        Returns
+        -------
+        list[int]
+            List of issue numbers cleaned.
+        """
+        try:
+            repo = self._resolve_repo(repo_name_or_obj)
+        except Exception as exc:
+            self._log(f"clean_issues: could not resolve repo {repo_name_or_obj!r}: {exc}", logging.WARNING)
+            return []
+
+        repo_name = getattr(repo, "name", str(repo_name_or_obj))
+        self._log(f"Cleaning issues in {repo_name!r} (prefix={prefix!r})")
+        cleaned_numbers: list[int] = []
+
+        try:
+            issues = list(repo.get_issues(state="all"))
+        except Exception as exc:
+            self._log(f"Failed to list issues in {repo_name!r}: {exc}", logging.ERROR)
+            return []
+
+        for issue in issues:
+            title = getattr(issue, "title", "")
+            state = getattr(issue, "state", "open")
+            num = getattr(issue, "number", 0)
+
+            # If already archived, just ensure it is closed
+            if title.startswith(archive_prefix):
+                if state == "open":
+                    try:
+                        issue.edit(state="closed")
+                        self._log(f"  Closed already-archived issue #{num} in {repo_name!r}")
+                    except Exception as exc:
+                        self._log(f"  Could not close issue #{num}: {exc}", logging.WARNING)
+                continue
+
+            # Prefix filtering
+            if prefix is not None:
+                matches = title.startswith(prefix) or (f": {prefix}" in title) or (prefix in title)
+                if not matches:
+                    continue
+
+            # Archive and close
+            new_title = f"{archive_prefix} {title}"
+            try:
+                issue.edit(title=new_title, state="closed")
+                cleaned_numbers.append(num)
+                self._log(f"  Archived & closed issue #{num} ({title!r} -> {new_title!r}) in {repo_name!r}")
+            except Exception as exc:
+                self._log(f"  Failed to archive issue #{num}: {exc}", logging.WARNING)
+
+        return cleaned_numbers
+
+    def clean_branches(
+        self,
+        repo_name_or_obj: Any,
+        prefix: Optional[str] = "eval-",
+        protected_branches: Optional[list[str]] = None,
+    ) -> list[str]:
+        """
+        Delete old evaluation branches from a repository.
+
+        Ensures that subsequent runs creating branches like 'eval-branch-*' do
+        not fail with 'Reference already exists' (HTTP 422).
+
+        Never deletes default_branch or protected branches ('main', 'master').
+        """
+        try:
+            repo = self._resolve_repo(repo_name_or_obj)
+        except Exception as exc:
+            self._log(f"clean_branches: could not resolve repo {repo_name_or_obj!r}: {exc}", logging.WARNING)
+            return []
+
+        repo_name = getattr(repo, "name", str(repo_name_or_obj))
+        default_branch = getattr(repo, "default_branch", "main")
+        protected = set(protected_branches or ["main", "master", "development"])
+        if default_branch:
+            protected.add(default_branch)
+
+        self._log(f"Cleaning branches in {repo_name!r} (prefix={prefix!r})")
+        deleted_branches: list[str] = []
+
+        try:
+            branches = list(repo.get_branches())
+        except Exception as exc:
+            self._log(f"Failed to list branches in {repo_name!r}: {exc}", logging.ERROR)
+            return []
+
+        for b in branches:
+            b_name = getattr(b, "name", "")
+            if b_name in protected:
+                continue
+            if prefix is not None and not b_name.startswith(prefix):
+                continue
+
+            try:
+                ref = repo.get_git_ref(f"heads/{b_name}")
+                ref.delete()
+                deleted_branches.append(b_name)
+                self._log(f"  Deleted branch {b_name!r} in {repo_name!r}")
+            except UnknownObjectException:
+                pass
+            except Exception as exc:
+                self._log(f"  Failed to delete branch {b_name!r}: {exc}", logging.WARNING)
+
+        return deleted_branches
+
+    def clean_pull_requests(
+        self,
+        repo_name_or_obj: Any,
+        prefix: Optional[str] = "eval-",
+        archive_prefix: str = "[ARCHIVED]",
+    ) -> list[int]:
+        """
+        Clean old evaluation pull requests from a repository.
+
+        Closes open evaluation PRs and archives their titles to prevent
+        'AMBIGUOUS_RESOURCE' errors during title/head verification.
+        """
+        try:
+            repo = self._resolve_repo(repo_name_or_obj)
+        except Exception as exc:
+            self._log(f"clean_pull_requests: could not resolve repo {repo_name_or_obj!r}: {exc}", logging.WARNING)
+            return []
+
+        repo_name = getattr(repo, "name", str(repo_name_or_obj))
+        self._log(f"Cleaning pull requests in {repo_name!r} (prefix={prefix!r})")
+        cleaned_prs: list[int] = []
+
+        try:
+            pulls = list(repo.get_pulls(state="all"))
+        except Exception as exc:
+            self._log(f"Failed to list pull requests in {repo_name!r}: {exc}", logging.ERROR)
+            return []
+
+        for pr in pulls:
+            title = getattr(pr, "title", "")
+            state = getattr(pr, "state", "open")
+            num = getattr(pr, "number", 0)
+            head_ref = getattr(getattr(pr, "head", None), "ref", "")
+
+            if title.startswith(archive_prefix):
+                if state == "open":
+                    try:
+                        pr.edit(state="closed")
+                        self._log(f"  Closed already-archived PR #{num} in {repo_name!r}")
+                    except Exception as exc:
+                        self._log(f"  Could not close PR #{num}: {exc}", logging.WARNING)
+                continue
+
+            if prefix is not None:
+                matches = title.startswith(prefix) or head_ref.startswith(prefix) or (prefix in title)
+                if not matches:
+                    continue
+
+            new_title = f"{archive_prefix} {title}"
+            try:
+                pr.edit(title=new_title, state="closed")
+                cleaned_prs.append(num)
+                self._log(f"  Archived & closed PR #{num} ({title!r} -> {new_title!r}) in {repo_name!r}")
+            except Exception as exc:
+                self._log(f"  Failed to clean PR #{num}: {exc}", logging.WARNING)
+
+        return cleaned_prs
+
+    def clean_eval_repos(
+        self,
+        prefix: str = "eval-",
+        exclude_repos: Optional[list[str]] = None,
+    ) -> list[str]:
+        """
+        Delete old evaluation repositories matching prefix.
+
+        Safely excludes target evaluation repositories, production repos,
+        and current project repos.
+        """
+        self._log(f"Cleaning evaluation repositories (prefix={prefix!r})")
+        exclude: set[str] = {"200-Tools", "Two-Hundered-Tools", "Two-Hundred-Tools"}
+        if exclude_repos:
+            for item in exclude_repos:
+                if not item:
+                    continue
+                exclude.add(item)
+                if "/" in item:
+                    exclude.add(item.split("/")[-1])
+
+        deleted: list[str] = []
+        try:
+            owner_obj = self._gh.get_user(self._owner)
+            repos = list(owner_obj.get_repos())
+        except Exception as exc:
+            self._log(f"Failed to list user repositories for cleanup: {exc}", logging.ERROR)
+            return []
+
+        for r in repos:
+            r_name = getattr(r, "name", "")
+            full_name = getattr(r, "full_name", f"{self._owner}/{r_name}")
+            if r_name in exclude or full_name in exclude:
+                continue
+            if r_name.startswith(prefix):
+                try:
+                    r.delete()
+                    deleted.append(r_name)
+                    self._log(f"  Deleted evaluation repository {r_name!r}")
+                except Exception as exc:
+                    self._log(f"  Failed to delete repository {r_name!r}: {exc}", logging.WARNING)
+
+        return deleted
+
+    def clean_repo_state(
+        self,
+        repo_name_or_obj: Any,
+        prefix: Optional[str] = "eval-",
+    ) -> dict[str, Any]:
+        """
+        Comprehensive cleaner for a sandbox repository.
+        Cleans issues, branches, and pull requests.
+        """
+        issues = self.clean_issues(repo_name_or_obj, prefix=prefix)
+        branches = self.clean_branches(repo_name_or_obj, prefix=prefix)
+        prs = self.clean_pull_requests(repo_name_or_obj, prefix=prefix)
+        repo_name = getattr(repo_name_or_obj, "name", str(repo_name_or_obj))
+
+        return {
+            "repo": repo_name,
+            "issues_cleaned": issues,
+            "branches_deleted": branches,
+            "pull_requests_closed": prs,
+        }
+
+    def clean_task_state(
+        self,
+        repo_name_or_obj: Any,
+        task: dict[str, Any],
+        archive_prefix: str = "[ARCHIVED]",
+    ) -> dict[str, Any]:
+        """
+        Clean resources specifically expected/created by a single task.
+
+        Inspects task['expected_state'] for:
+        - issue.title -> archive/close existing issue with this title
+        - branch.name -> delete existing branch with this name
+        - pull_request.title / head -> archive/close existing PR
+        - repository.name -> delete existing repository if created by task
+        """
+        exp = task.get("expected_state") or {}
+        cleaned_info: dict[str, Any] = {
+            "task_id": task.get("task_id", ""),
+            "issues_archived": [],
+            "branches_deleted": [],
+            "prs_archived": [],
+            "repos_deleted": [],
+        }
+
+        # 1. Check issue title
+        issue_exp = exp.get("issue")
+        if isinstance(issue_exp, dict) and issue_exp.get("title"):
+            target_title = issue_exp["title"]
+            try:
+                repo = self._resolve_repo(repo_name_or_obj)
+                for i in repo.get_issues(state="all"):
+                    if i.title == target_title:
+                        new_title = f"{archive_prefix} {i.title}"
+                        i.edit(title=new_title, state="closed")
+                        cleaned_info["issues_archived"].append(i.number)
+                        self._log(f"Pre-task clean: archived issue #{i.number} {target_title!r}")
+            except Exception as exc:
+                self._log(f"Pre-task clean issue error: {exc}", logging.WARNING)
+
+        # 2. Check branch name
+        branch_exp = exp.get("branch")
+        if isinstance(branch_exp, dict) and branch_exp.get("name"):
+            branch_name = branch_exp["name"].replace("refs/heads/", "")
+            try:
+                repo = self._resolve_repo(repo_name_or_obj)
+                default_b = getattr(repo, "default_branch", "main")
+                if branch_name not in ("main", "master", default_b):
+                    ref = repo.get_git_ref(f"heads/{branch_name}")
+                    ref.delete()
+                    cleaned_info["branches_deleted"].append(branch_name)
+                    self._log(f"Pre-task clean: deleted branch {branch_name!r}")
+            except UnknownObjectException:
+                pass
+            except Exception as exc:
+                self._log(f"Pre-task clean branch error: {exc}", logging.WARNING)
+
+        # 3. Check pull request
+        pr_exp = exp.get("pull_request")
+        if isinstance(pr_exp, dict):
+            pr_title = pr_exp.get("title")
+            pr_head = pr_exp.get("head")
+            if pr_title or pr_head:
+                try:
+                    repo = self._resolve_repo(repo_name_or_obj)
+                    for pr in repo.get_pulls(state="all"):
+                        head_ref = getattr(getattr(pr, "head", None), "ref", "")
+                        if (pr_title and pr.title == pr_title) or (pr_head and head_ref == pr_head):
+                            if not pr.title.startswith(archive_prefix):
+                                pr.edit(title=f"{archive_prefix} {pr.title}", state="closed")
+                            elif pr.state == "open":
+                                pr.edit(state="closed")
+                            cleaned_info["prs_archived"].append(pr.number)
+                            self._log(f"Pre-task clean: archived PR #{pr.number}")
+                except Exception as exc:
+                    self._log(f"Pre-task clean PR error: {exc}", logging.WARNING)
+
+        # 4. Check repository
+        repo_exp = exp.get("repository")
+        if isinstance(repo_exp, dict) and repo_exp.get("name"):
+            r_name = repo_exp["name"]
+            if r_name.startswith("eval-"):
+                try:
+                    if self.delete_repo(r_name):
+                        cleaned_info["repos_deleted"].append(r_name)
+                        self._log(f"Pre-task clean: deleted repo {r_name!r}")
+                except Exception as exc:
+                    self._log(f"Pre-task clean repo error: {exc}", logging.WARNING)
+
+        return cleaned_info
+
+    def clean_sandbox(
+        self,
+        target_repo: Optional[str] = None,
+        prefix: str = "eval-",
+        clean_repos: bool = True,
+        auto_create_target: bool = True,
+    ) -> dict[str, Any]:
+        """
+        Top-level pre-flight sandbox reset.
+
+        1. Deletes old ephemeral evaluation repositories (matching prefix),
+           safely excluding target_repo.
+        2. If target_repo is specified:
+           - If it does not exist and auto_create_target is True, creates & seeds it.
+           - If it exists, cleans old issues, branches, and PRs inside it.
+
+        Returns structured summary dict.
+        """
+        self._log(f"Starting top-level sandbox reset (target={target_repo!r})")
+        self._log_rate_limit("Before clean_sandbox")
+
+        summary: dict[str, Any] = {
+            "target_repo": target_repo,
+            "repos_deleted": [],
+            "repo_created": False,
+            "repo_state": {},
+        }
+
+        # 1. Clean ephemeral evaluation repos
+        if clean_repos:
+            exclude = [target_repo] if target_repo else []
+            deleted = self.clean_eval_repos(prefix=prefix, exclude_repos=exclude)
+            summary["repos_deleted"] = deleted
+
+        # 2. Handle target repo
+        if target_repo:
+            target_bare = target_repo.split("/")[-1] if "/" in target_repo else target_repo
+            exists = self.repo_exists(target_repo)
+
+            if not exists and auto_create_target:
+                self._log(f"Target repository {target_repo!r} does not exist — creating and seeding")
+                try:
+                    new_repo = self.create_repo(target_bare)
+                    self.seed_repo(new_repo)
+                    summary["repo_created"] = True
+                except Exception as exc:
+                    self._log(f"Failed to auto-create target repository {target_repo!r}: {exc}", logging.WARNING)
+            elif exists:
+                summary["repo_state"] = self.clean_repo_state(target_repo, prefix=prefix)
+
+        self._log_rate_limit("After clean_sandbox")
+        self._log("Sandbox reset complete")
+        return summary
 
     def reset_repo(self, repo_name: str):
         """

@@ -42,6 +42,7 @@ import json
 import logging
 import os
 import sys
+import time
 from typing import Any, Optional
 
 from dotenv import load_dotenv
@@ -233,9 +234,16 @@ def _fetch_issue(full_name: str, issue_number: int, token: Optional[str] = None)
         return None, ("INFRASTRUCTURE_ERROR", f"Unexpected error: {type(exc).__name__}: {exc}")
 
 
-def _search_issue_by_title(full_name: str, title: str, token: Optional[str] = None):
+def _search_issue_by_title(
+    full_name: str,
+    title: str,
+    token: Optional[str] = None,
+    max_retries: int = 3,
+    retry_delay: float = 1.5,
+):
     """
     Look up an issue by exact title within *full_name*.
+    Includes a brief retry loop to absorb GitHub's read-after-write replication delay.
 
     Returns ``(issue_obj, None)`` on a unique match.
     Returns ``(None, (kind, message))`` on zero or multiple matches.
@@ -243,15 +251,23 @@ def _search_issue_by_title(full_name: str, title: str, token: Optional[str] = No
     repo, err = _fetch_repo(full_name, token)
     if err:
         return None, err
-    try:
-        matches = [i for i in repo.get_issues(state="all") if i.title == title]
-    except RateLimitExceededException as exc:
-        return None, ("RATE_LIMITED", f"GitHub rate limit exceeded: {exc}")
-    except GithubException as exc:
-        status = getattr(exc, "status", None)
-        return None, ("INFRASTRUCTURE_ERROR", f"GitHub API error {status}: {exc.data}")
-    except Exception as exc:
-        return None, ("INFRASTRUCTURE_ERROR", f"Unexpected error: {type(exc).__name__}: {exc}")
+
+    matches = []
+    for attempt in range(max_retries):
+        try:
+            matches = [i for i in repo.get_issues(state="all") if i.title == title]
+            if len(matches) > 0:
+                break
+        except RateLimitExceededException as exc:
+            return None, ("RATE_LIMITED", f"GitHub rate limit exceeded: {exc}")
+        except GithubException as exc:
+            status = getattr(exc, "status", None)
+            return None, ("INFRASTRUCTURE_ERROR", f"GitHub API error {status}: {exc.data}")
+        except Exception as exc:
+            return None, ("INFRASTRUCTURE_ERROR", f"Unexpected error: {type(exc).__name__}: {exc}")
+
+        if attempt < max_retries - 1:
+            time.sleep(retry_delay)
 
     if len(matches) == 0:
         return None, ("NOT_FOUND", f"No issue with title '{title}' found in '{full_name}'.")
@@ -265,29 +281,40 @@ def _search_issue_by_title(full_name: str, title: str, token: Optional[str] = No
     return matches[0], None
 
 
-def _fetch_branch(full_name: str, branch_name: str, token: Optional[str] = None):
+def _fetch_branch(
+    full_name: str,
+    branch_name: str,
+    token: Optional[str] = None,
+    max_retries: int = 3,
+    retry_delay: float = 1.5,
+):
     """
     Fetch a single branch by name within *full_name*.
+    Includes a brief retry loop for replication delay on freshly created branches.
 
     Returns ``(branch_obj, None)`` or ``(None, (kind, message))``.
     """
     repo, err = _fetch_repo(full_name, token)
     if err:
         return None, err
-    try:
-        # Strip refs/heads/ if present
-        cleaned_name = branch_name.replace("refs/heads/", "")
-        branch = repo.get_branch(cleaned_name)
-        return branch, None
-    except UnknownObjectException:
-        return None, ("NOT_FOUND", f"Branch '{branch_name}' not found in '{full_name}'.")
-    except RateLimitExceededException as exc:
-        return None, ("RATE_LIMITED", f"GitHub rate limit exceeded: {exc}")
-    except GithubException as exc:
-        status = getattr(exc, "status", None)
-        return None, ("INFRASTRUCTURE_ERROR", f"GitHub API error {status}: {exc.data}")
-    except Exception as exc:
-        return None, ("INFRASTRUCTURE_ERROR", f"Unexpected error: {type(exc).__name__}: {exc}")
+
+    cleaned_name = branch_name.replace("refs/heads/", "")
+    for attempt in range(max_retries):
+        try:
+            branch = repo.get_branch(cleaned_name)
+            return branch, None
+        except UnknownObjectException:
+            if attempt < max_retries - 1:
+                time.sleep(retry_delay)
+                continue
+            return None, ("NOT_FOUND", f"Branch '{branch_name}' not found in '{full_name}'.")
+        except RateLimitExceededException as exc:
+            return None, ("RATE_LIMITED", f"GitHub rate limit exceeded: {exc}")
+        except GithubException as exc:
+            status = getattr(exc, "status", None)
+            return None, ("INFRASTRUCTURE_ERROR", f"GitHub API error {status}: {exc.data}")
+        except Exception as exc:
+            return None, ("INFRASTRUCTURE_ERROR", f"Unexpected error: {type(exc).__name__}: {exc}")
 
 
 def _fetch_pull(
@@ -296,55 +323,72 @@ def _fetch_pull(
     head: Optional[str] = None,
     title: Optional[str] = None,
     token: Optional[str] = None,
+    max_retries: int = 3,
+    retry_delay: float = 1.5,
 ):
     """
     Fetch a single pull request by number, head branch, or title.
+    Includes a brief retry loop for replication delay on freshly opened PRs.
 
     Returns ``(pull_obj, None)`` or ``(None, (kind, message))``.
     """
     repo, err = _fetch_repo(full_name, token)
     if err:
         return None, err
-    try:
-        if pull_number is not None:
+
+    if pull_number is not None:
+        try:
             pull = repo.get_pull(number=pull_number)
             return pull, None
+        except UnknownObjectException:
+            return None, ("NOT_FOUND", f"Pull request not found in '{full_name}'.")
+        except RateLimitExceededException as exc:
+            return None, ("RATE_LIMITED", f"GitHub rate limit exceeded: {exc}")
+        except GithubException as exc:
+            status = getattr(exc, "status", None)
+            return None, ("INFRASTRUCTURE_ERROR", f"GitHub API error {status}: {exc.data}")
+        except Exception as exc:
+            return None, ("INFRASTRUCTURE_ERROR", f"Unexpected error: {type(exc).__name__}: {exc}")
 
-        # Look up across open and closed pulls
-        pulls = list(repo.get_pulls(state="all"))
-        if head:
-            # head may be 'branch' or 'owner:branch' or 'refs/heads/branch'
-            target_head = head.replace("refs/heads/", "")
-            matches = [
-                p for p in pulls
-                if p.head.ref == target_head or getattr(p.head, "label", "") == target_head
-            ]
-            if not matches:
-                return None, ("NOT_FOUND", f"No pull request with head '{head}' found in '{full_name}'.")
-            return matches[0], None
+    target_head = head.replace("refs/heads/", "") if head else None
 
-        if title:
-            matches = [p for p in pulls if p.title == title]
-            if not matches:
-                return None, ("NOT_FOUND", f"No pull request with title '{title}' found in '{full_name}'.")
-            if len(matches) > 1:
-                nums = [str(p.number) for p in matches]
-                return None, (
-                    "AMBIGUOUS_RESOURCE",
-                    f"Multiple pull requests with title '{title}' found in '{full_name}' (#{', #'.join(nums)}).",
-                )
-            return matches[0], None
+    for attempt in range(max_retries):
+        try:
+            pulls = list(repo.get_pulls(state="all"))
+            if target_head:
+                matches = [
+                    p for p in pulls
+                    if p.head.ref == target_head or getattr(p.head, "label", "") == target_head
+                ]
+                if matches:
+                    return matches[0], None
 
-        return None, ("INVALID_ARGUMENTS", "Either pull_number, head, or title must be provided.")
-    except UnknownObjectException:
-        return None, ("NOT_FOUND", f"Pull request not found in '{full_name}'.")
-    except RateLimitExceededException as exc:
-        return None, ("RATE_LIMITED", f"GitHub rate limit exceeded: {exc}")
-    except GithubException as exc:
-        status = getattr(exc, "status", None)
-        return None, ("INFRASTRUCTURE_ERROR", f"GitHub API error {status}: {exc.data}")
-    except Exception as exc:
-        return None, ("INFRASTRUCTURE_ERROR", f"Unexpected error: {type(exc).__name__}: {exc}")
+            if title:
+                matches = [p for p in pulls if p.title == title]
+                if len(matches) > 1:
+                    nums = [str(p.number) for p in matches]
+                    return None, (
+                        "AMBIGUOUS_RESOURCE",
+                        f"Multiple pull requests with title '{title}' found in '{full_name}' (#{', #'.join(nums)}).",
+                    )
+                if matches:
+                    return matches[0], None
+        except RateLimitExceededException as exc:
+            return None, ("RATE_LIMITED", f"GitHub rate limit exceeded: {exc}")
+        except GithubException as exc:
+            status = getattr(exc, "status", None)
+            return None, ("INFRASTRUCTURE_ERROR", f"GitHub API error {status}: {exc.data}")
+        except Exception as exc:
+            return None, ("INFRASTRUCTURE_ERROR", f"Unexpected error: {type(exc).__name__}: {exc}")
+
+        if attempt < max_retries - 1:
+            time.sleep(retry_delay)
+
+    if target_head:
+        return None, ("NOT_FOUND", f"No pull request with head '{head}' found in '{full_name}'.")
+    if title:
+        return None, ("NOT_FOUND", f"No pull request with title '{title}' found in '{full_name}'.")
+    return None, ("INVALID_ARGUMENTS", "Either pull_number, head, or title must be provided.")
 
 
 # ---------------------------------------------------------------------------
@@ -896,6 +940,7 @@ def verify_state(
     all_errors: list[str] = []
 
     # 1. Repository
+    target_repo = repo
     if "repository" in expected_state:
         repo_exp = expected_state["repository"]
         target_repo = repo_exp.get("name", repo)
@@ -912,7 +957,7 @@ def verify_state(
         branch_exp = expected_state["branch"]
         branch_name = branch_exp.get("name")
         if branch_name:
-            res = verify_branch(repo, branch_name, branch_exp, token=token)
+            res = verify_branch(target_repo, branch_name, branch_exp, token=token)
             sub_results["branch"] = res
             if not res["passed"]:
                 all_passed = False
@@ -922,7 +967,7 @@ def verify_state(
     if "issue" in expected_state:
         issue_exp = expected_state["issue"]
         res = verify_issue(
-            repo,
+            target_repo,
             expected_state=issue_exp,
             title=issue_exp.get("title"),
             issue_number=issue_exp.get("number"),
@@ -937,7 +982,7 @@ def verify_state(
     if "pull_request" in expected_state:
         pr_exp = expected_state["pull_request"]
         res = verify_pull_request(
-            repo,
+            target_repo,
             pull_number=pr_exp.get("number"),
             head=pr_exp.get("head"),
             title=pr_exp.get("title"),
