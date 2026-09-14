@@ -165,7 +165,7 @@ def _get_client(token: Optional[str] = None) -> Github:
             raise VerifierConfigError(
                 "GITHUB_TOKEN not set.  Export it or add it to .env."
             )
-        _gh_client = Github(tok)
+        _gh_client = Github(tok, timeout=30)
     return _gh_client
 
 
@@ -255,7 +255,15 @@ def _search_issue_by_title(
     matches = []
     for attempt in range(max_retries):
         try:
-            matches = [i for i in repo.get_issues(state="all") if i.title == title]
+            issues_iter = repo.get_issues(state="all", sort="created", direction="desc")
+            matches = []
+            count = 0
+            for i in issues_iter:
+                if i.title == title:
+                    matches.append(i)
+                count += 1
+                if (matches and count >= 5) or count >= 30:
+                    break
             if len(matches) > 0:
                 break
         except RateLimitExceededException as exc:
@@ -354,17 +362,45 @@ def _fetch_pull(
 
     for attempt in range(max_retries):
         try:
-            pulls = list(repo.get_pulls(state="all"))
             if target_head:
-                matches = [
-                    p for p in pulls
-                    if p.head.ref == target_head or getattr(p.head, "label", "") == target_head
-                ]
-                if matches:
-                    return matches[0], None
+                owner = full_name.split("/")[0] if "/" in full_name else ""
+                try:
+                    pulls_by_head = list(repo.get_pulls(state="all", head=f"{owner}:{target_head}"))
+                    if not pulls_by_head:
+                        pulls_by_head = list(repo.get_pulls(state="all", head=target_head))
+                    non_archived = [p for p in pulls_by_head if not p.title.startswith("[ARCHIVED]")]
+                    if non_archived:
+                        return non_archived[0], None
+                    if pulls_by_head:
+                        return pulls_by_head[0], None
+                except Exception:
+                    pass
+
+            pulls_iter = repo.get_pulls(state="all", sort="created", direction="desc")
+            pulls = []
+            for p in pulls_iter:
+                pulls.append(p)
+                if len(pulls) >= 25:
+                    break
+
+            if target_head:
+                for p in pulls:
+                    try:
+                        if not p.title.startswith("[ARCHIVED]") and (p.head.ref == target_head or getattr(p.head, "label", "") == target_head):
+                            return p, None
+                    except Exception:
+                        continue
+                for p in pulls:
+                    try:
+                        if p.head.ref == target_head or getattr(p.head, "label", "") == target_head:
+                            return p, None
+                    except Exception:
+                        continue
 
             if title:
-                matches = [p for p in pulls if p.title == title]
+                matches = [p for p in pulls if p.title == title and not p.title.startswith("[ARCHIVED]")]
+                if not matches:
+                    matches = [p for p in pulls if p.title == title]
                 if len(matches) > 1:
                     nums = [str(p.number) for p in matches]
                     return None, (
@@ -734,10 +770,13 @@ _ISSUE_FIELD_EXTRACTORS: dict[str, Any] = {
 }
 
 
-def _snapshot_issue(issue) -> dict:
+def _snapshot_issue(issue, expected_state: Optional[dict] = None) -> dict:
     """Extract all known verifiable fields from a PyGithub Issue."""
     snap: dict = {}
+    exp_keys = set(expected_state.keys()) if expected_state else set()
     for field, extractor in _ISSUE_FIELD_EXTRACTORS.items():
+        if field == "comment_contains" and "comment_contains" not in exp_keys:
+            continue
         try:
             snap[field] = extractor(issue)
         except Exception:
@@ -776,7 +815,7 @@ def verify_issue(
         kind, msg = err
         return _infra_fail(resource, identifier, msg, kind)
 
-    actual = _snapshot_issue(issue_obj)
+    actual = _snapshot_issue(issue_obj, expected_state=expected_state)
     identifier = actual.get("number", identifier)
 
     checks: dict[str, bool] = {"exists": True}

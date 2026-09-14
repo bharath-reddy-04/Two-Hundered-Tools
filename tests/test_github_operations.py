@@ -160,14 +160,15 @@ class TestExecuteOperationRouting(unittest.TestCase):
         self.assertEqual(res["result"], self.mock_repo)
 
     def test_git_create_ref(self):
+        full_sha = "a" * 40  # valid 40-char hex SHA
         res = execute_operation(
             self.sb,
             "git/create-ref",
-            {"repo": "owner/repo", "ref": "refs/heads/new-branch", "sha": "1234abcd"},
+            {"repo": "owner/repo", "ref": "refs/heads/new-branch", "sha": full_sha},
         )
         self.assertTrue(res["success"])
         self.mock_repo.create_git_ref.assert_called_once_with(
-            ref="refs/heads/new-branch", sha="1234abcd"
+            ref="refs/heads/new-branch", sha=full_sha
         )
 
     def test_pulls_create(self):

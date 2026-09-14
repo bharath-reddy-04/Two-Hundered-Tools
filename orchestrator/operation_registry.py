@@ -137,12 +137,40 @@ class OperationRegistry:
             return None
 
     # ------------------------------------------------------------------
-    # Deferred — do NOT implement bodies. Signatures only.
+    # category_gated support — implemented
     # ------------------------------------------------------------------
 
     def get_by_category(self, category: str) -> list[OperationDefinition]:
-        """Return operations in a category. Used by category_gated mode."""
-        raise NotImplementedError("category_gated not yet implemented")
+        """
+        Return all operations whose category matches *category* (case-insensitive).
+
+        Used by category_gated mode.  Derived from the already-loaded
+        _definitions dict — no extra I/O required.
+
+        Returns an empty list if no operations belong to the category;
+        callers must treat an empty result as an error, not a silent no-op.
+        """
+        needle = category.lower()
+        return [
+            op for op in self._definitions.values()
+            if op.category.lower() == needle
+        ]
+
+    def get_all_categories(self) -> list[str]:
+        """
+        Return a sorted list of unique non-empty category names across all
+        loaded operations.
+
+        Derived live from _definitions so it can never drift out of sync
+        with the catalog.
+        """
+        return sorted(
+            {op.category for op in self._definitions.values() if op.category}
+        )
+
+    # ------------------------------------------------------------------
+    # Deferred — do NOT implement bodies. Signatures only.
+    # ------------------------------------------------------------------
 
     def search(self, query: str, k: int = 8) -> list[OperationDefinition]:
         """Semantic search over operations. Used by search_then_load mode."""

@@ -287,7 +287,9 @@ class GitHubSandbox:
         Returns the new PyGithub Repository object.
         """
         self._log(f"Creating repository {repo_name!r} (private={private})")
-        owner_obj = self._gh.get_user(self._owner)
+        owner_obj = self._gh.get_user()
+        if not hasattr(owner_obj, "create_repo"):
+            owner_obj = self._gh.get_user(self._owner)
         repo = owner_obj.create_repo(
             name=repo_name,
             description=f"Evaluation sandbox | run_id={self.run_id}",

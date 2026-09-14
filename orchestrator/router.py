@@ -18,7 +18,7 @@ from orchestrator.schemas import OrchestrationError
 logger = logging.getLogger(__name__)
 
 
-def route_after_dry_run(state: dict[str, Any]) -> str:
+def route_after_dry_run(state: dict[str, Any], config: OrchestratorConfig | None = None) -> str:
     """
     Decide next step after dry-run completes.
 
@@ -28,8 +28,14 @@ def route_after_dry_run(state: dict[str, Any]) -> str:
         "approve"  — if any planned operation is irreversible
         "execute"  — if dry-run passed and no approval needed
         "replan"   — if dry-run failed with recoverable errors
-        "failed"   — if dry-run failed with unrecoverable errors
+        "failed"   — if dry-run failed with unrecoverable errors or retry limit reached
     """
+    retry_count = state.get("retry_count", 0)
+    max_replans = getattr(config, "max_replans", 2) if config else 2
+    if retry_count > max_replans:
+        logger.info("Router: retry limit reached (%d/%d) in dry-run → failed", retry_count, max_replans)
+        return "failed"
+
     dry_run_result = state.get("dry_run_result")
 
     # If replanning was flagged during schema discovery or validation

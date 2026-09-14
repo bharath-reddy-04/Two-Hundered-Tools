@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
+
 from pydantic import BaseModel, Field
 
 
@@ -123,9 +124,15 @@ class OrchestrationError(BaseModel):
     code: str
     # Valid codes:
     #   UNKNOWN_OPERATION | SCHEMA_DISCOVERY_FAILED | INVALID_PARAMETERS |
-    #   PLAN_INVALID | DRY_RUN_FAILED | APPROVAL_REJECTED |
+    #   PLAN_INVALID | PLAN_PARSE_ERROR | DRY_RUN_FAILED | APPROVAL_REJECTED |
     #   EXECUTION_FAILED | VERIFICATION_FAILED | REPLAN_LIMIT_EXCEEDED |
-    #   MODEL_FAILURE | UNSUPPORTED_DISCLOSURE_MODE
+    #   MODEL_FAILURE | PLAN_DEGRADED | UNSUPPORTED_DISCLOSURE_MODE
+    #
+    #   MODEL_FAILURE    — API / network call failed
+    #   PLAN_PARSE_ERROR — response came back but was not valid JSON
+    #   PLAN_INVALID     — JSON parsed but plan is semantically invalid
+    #                      (empty operations, failed Pydantic validation, …)
+    #   PLAN_DEGRADED    — category_gated fell back to all_loaded candidates
     message: str
     component: str
     node: Optional[str] = None

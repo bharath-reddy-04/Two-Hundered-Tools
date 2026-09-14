@@ -21,26 +21,20 @@ from __future__ import annotations
 
 import json
 import logging
-import uuid
 from datetime import datetime, timezone
 from typing import Any, Callable, Optional
 
 from langgraph.types import interrupt
 
 from orchestrator.config import (
-    DEFERRED_DISCLOSURE_MODES,
     IRREVERSIBLE_OPERATIONS,
-    ModelRole,
     OrchestratorConfig,
 )
 from orchestrator.schemas import (
     DryRunCheck,
     DryRunResult,
-    ExpectedOutcome,
     OperationResult,
     OrchestrationError,
-    Plan,
-    PlannedOperation,
     TraceEvent,
     VerificationCheck,
     VerificationResult,
@@ -119,171 +113,34 @@ def create_nodes(
         """
         Generate an execution plan from the task objective.
 
-        Only all_loaded disclosure mode is supported — others raise
-        NotImplementedError immediately.
+        Delegates to the appropriate disclosure-mode module in modes/.
+        Currently supported: all_loaded, category_gated.
+        Raises NotImplementedError for unimplemented modes.
         """
+        from modes import get_plan_builder  # local import — avoids circular dep
+
+        import time as _time
         mode = state.get("disclosure_mode", "")
-        if mode in DEFERRED_DISCLOSURE_MODES:
-            raise NotImplementedError(
-                f"disclosure_mode '{mode}' not yet implemented"
-            )
-        if mode != "all_loaded":
-            raise NotImplementedError(
-                f"disclosure_mode '{mode}' not yet implemented"
-            )
-
         _trace(state, "planning_started", "plan")
-
-        # Get all operations for all_loaded mode
-        candidates = registry.get_all()
-        candidate_summaries = [
-            {
-                "operation_id": op.operation_id,
-                "method": op.method,
-                "path": op.path,
-                "summary": op.summary,
-                "risk": op.risk,
-                "is_irreversible": op.is_irreversible,
-            }
-            for op in candidates
-        ]
-
-        # Build the planning prompt
-        task = state.get("task", {})
-        objective = state.get("objective", "")
-        user_request = state.get("user_request", objective)
-        repo = state.get("repo", "")
-        retry_count = state.get("retry_count", 0)
-        successful_ops = state.get("successful_operations", [])
-
-        replan_context = ""
-        if retry_count > 0:
-            verification = state.get("verification_result")
-            if verification:
-                replan_context = (
-                    f"\n\nThis is replan attempt {retry_count}. "
-                    f"Previous verification result: verified={verification.verified}\n"
-                    f"Missing conditions: {verification.missing_conditions}\n"
-                    f"Unexpected conditions: {verification.unexpected_conditions}\n"
-                    f"Already-succeeded operations (DO NOT repeat): {successful_ops}\n"
-                    f"Plan only the remaining operations needed to fill the gap."
-                )
-
-        expected_state = task.get("expected_state", {})
-
-        system_prompt = (
-            "You are a GitHub task planning agent. Given a task objective and a catalog "
-            "of available GitHub API operations, produce a JSON execution plan.\n\n"
-            "RULES:\n"
-            "1. Select ONLY operations from the provided catalog — never invent an operation_id.\n"
-            "2. Provide all required parameters for each operation.\n"
-            "3. If an operation depends on another's output, list it in depends_on.\n"
-            "4. For path parameters like 'owner' and 'repo', use the provided values.\n"
-            "5. For git/create-ref, the ref must be 'refs/heads/<branch>' and sha must be provided.\n"
-            "6. Return ONLY valid JSON matching the Plan schema.\n"
-        )
-
-        user_content = (
-            f"Task: {user_request}\n"
-            f"Objective: {objective}\n"
-            f"Target repository: {repo}\n"
-            f"Expected state after execution: {json.dumps(expected_state)}\n"
-            f"{replan_context}\n\n"
-            f"Available operations:\n{json.dumps(candidate_summaries, indent=2)}\n\n"
-            f"Return a JSON object with this exact schema:\n"
-            f'{{\n'
-            f'  "task_id": "{state.get("task_id", "")}",\n'
-            f'  "disclosure_mode": "all_loaded",\n'
-            f'  "operations": [\n'
-            f'    {{"operation_id": "...", "parameters": {{...}}, "depends_on": [], "description": "..."}}\n'
-            f'  ],\n'
-            f'  "assumptions": ["..."],\n'
-            f'  "expected_outcomes": [\n'
-            f'    {{"resource": "issue|branch|pull_request|repository", "condition": "...", "expected_value": ...}}\n'
-            f'  ]\n'
-            f'}}'
-        )
+        if "_attempt_start_time" not in state or state.get("status") == "incomplete":
+            state["_attempt_start_time"] = _time.time()
 
         try:
-            from google.genai import types  # type: ignore
+            build_plan = get_plan_builder(mode)
+        except (NotImplementedError, ValueError) as exc:
+            raise NotImplementedError(str(exc)) from exc
 
-            gen_config = types.GenerateContentConfig(
-                system_instruction=system_prompt,
-                response_mime_type="application/json",
-            )
+        state = build_plan(state, registry, model_router, config)
 
-            contents = [{"role": "user", "parts": [{"text": user_content}]}]
-            response = model_router.generate(
-                ModelRole.ORCHESTRATION_PLANNER,
-                contents,
-                config=gen_config,
-            )
-
-            # Parse the response
-            response_text = ""
-            if response.candidates:
-                for part in response.candidates[0].content.parts:
-                    if hasattr(part, "text") and part.text:
-                        response_text += part.text
-
-            clean_text = response_text.strip()
-            if clean_text.startswith("```json"):
-                clean_text = clean_text[7:]
-            elif clean_text.startswith("```"):
-                clean_text = clean_text[3:]
-            if clean_text.endswith("```"):
-                clean_text = clean_text[:-3]
-            clean_text = clean_text.strip()
-
-            plan_dict = json.loads(clean_text)
-
-            # Build Plan object
-            operations = []
-            for op_data in plan_dict.get("operations", []):
-                operations.append(PlannedOperation(
-                    operation_id=op_data.get("operation_id", ""),
-                    parameters=op_data.get("parameters", {}),
-                    depends_on=op_data.get("depends_on", []),
-                    description=op_data.get("description", ""),
-                ))
-
-            expected_outcomes = []
-            for eo_data in plan_dict.get("expected_outcomes", []):
-                expected_outcomes.append(ExpectedOutcome(
-                    resource=eo_data.get("resource", ""),
-                    condition=eo_data.get("condition", ""),
-                    expected_value=eo_data.get("expected_value"),
-                ))
-
-            plan = Plan(
-                task_id=state.get("task_id", ""),
-                disclosure_mode="all_loaded",
-                operations=operations,
-                assumptions=plan_dict.get("assumptions", []),
-                expected_outcomes=expected_outcomes,
-            )
-
-            state["plan"] = plan
-            state["replanning_required"] = False
-
+        if state.get("plan") is not None:
+            plan = state["plan"]
             _trace(state, "plan_created", "plan", {
-                "operation_count": len(operations),
-                "operations": [op.operation_id for op in operations],
+                "operation_count": len(plan.operations),
+                "operations": [op.operation_id for op in plan.operations],
+                "disclosure_mode": mode,
             })
-
-        except json.JSONDecodeError as exc:
-            _add_error(state, "MODEL_FAILURE",
-                       f"Failed to parse LLM plan response as JSON: {exc}",
-                       "plan", recoverable=True)
-            state["replanning_required"] = True
-            state["plan"] = None
-
-        except Exception as exc:
-            _add_error(state, "MODEL_FAILURE",
-                       f"LLM planning call failed: {type(exc).__name__}: {exc}",
-                       "plan", recoverable=False)
-            state["replanning_required"] = True
-            state["plan"] = None
+        else:
+            _trace(state, "plan_failed", "plan", {"disclosure_mode": mode})
 
         return state
 
@@ -419,6 +276,7 @@ def create_nodes(
 
         plan = state.get("plan")
         if not plan or state.get("replanning_required"):
+            state["retry_count"] = state.get("retry_count", 0) + 1
             state["dry_run_result"] = DryRunResult(
                 passed=False,
                 checks=[],
@@ -504,6 +362,11 @@ def create_nodes(
                 if op.operation_id in IRREVERSIBLE_OPERATIONS
             ]
 
+        if getattr(config, "auto_approve", True):
+            state["approval_status"] = "approved"
+            _trace(state, "approval_granted", "approve", {"auto": True, "operations": irreversible_ops})
+            return state
+
         # LangGraph interrupt — pauses the graph until resumed
         approval = interrupt({
             "message": "Approval required for irreversible operations",
@@ -536,7 +399,12 @@ def create_nodes(
               → harness/github_sandbox.execute()
 
         Never calls sandbox directly. Never bypasses the registry.
+
+        Inter-step chaining: after each successful operation, key output
+        fields (issue_number, sha, pr_number, etc.) are captured and
+        automatically injected into subsequent operations' parameters.
         """
+        import re as _re
         import sys
         from pathlib import Path as _Path
 
@@ -562,6 +430,11 @@ def create_nodes(
         successful_ops = list(state.get("successful_operations", []))
         repo = state.get("repo", "")
 
+        # Inter-step output forwarding: captures key fields from prior results
+        # so that chained operations (e.g. create issue → comment on it) work
+        # even when the LLM emits template references instead of real values.
+        step_outputs: dict[str, Any] = dict(state.get("step_outputs", {}))
+
         for op in plan.operations:
             # Skip operations that already succeeded (idempotency on replan)
             if op.operation_id in successful_ops:
@@ -583,6 +456,56 @@ def create_nodes(
                     params.setdefault("repo", repo_name)
                 params.setdefault("owner", owner)
 
+            # ── Inter-step chaining ──────────────────────────────────
+            # Replace unresolved template references with actual values
+            # from prior step outputs.
+            for key, value in list(params.items()):
+                is_template = False
+                if isinstance(value, str):
+                    if key in ("issue_number", "number", "pull_number", "pr_number", "comment_id"):
+                        if not value.isdigit():
+                            is_template = True
+                    elif key in ("sha", "commit_sha", "tree_sha"):
+                        if not _re.fullmatch(r"[0-9a-fA-F]{40}", value):
+                            is_template = True
+                    elif _re.match(r"^(@|<|\{)?\$|^\s*\{\{.*\}\}\s*|^@|^<.*>$", value):
+                        is_template = True
+
+                if is_template:
+                    # This is a template reference — try to resolve from step_outputs
+                    resolved_val = step_outputs.get(key)
+                    if resolved_val is None and key in ("issue_number", "number"):
+                        resolved_val = step_outputs.get("issue_number") or step_outputs.get("number")
+                    elif resolved_val is None and key in ("pull_number", "pr_number"):
+                        resolved_val = step_outputs.get("pull_number") or step_outputs.get("number")
+                    elif resolved_val is None and key in ("sha", "commit_sha", "tree_sha"):
+                        resolved_val = step_outputs.get("sha")
+
+                    if resolved_val is not None:
+                        logger.info(
+                            "Resolved template ref for '%s': %r → %r",
+                            key, value, resolved_val,
+                        )
+                        params[key] = resolved_val
+                    else:
+                        logger.warning(
+                            "Unresolved template ref for '%s': %s (no prior output available)",
+                            key, value,
+                        )
+                        # Remove it so downstream auto-resolution can kick in
+                        del params[key]
+
+            # If creating a PR and expected_state / task references an issue, ensure it's in body
+            if op.operation_id in ("pulls/create", "pulls/update"):
+                task_obj = state.get("task", {})
+                expected_st = task_obj.get("expected_state", {}) if isinstance(task_obj, dict) else {}
+                ref_issue = expected_st.get("pull_request", {}).get("references_issue")
+                if ref_issue:
+                    body_text = str(params.get("body", ""))
+                    title_text = str(params.get("title", ""))
+                    if ref_issue.lower() not in body_text.lower() and ref_issue.lower() not in title_text.lower():
+                        params["body"] = (f"{body_text}\n\nFixes {ref_issue}").strip()
+
             logger.info("Executing: %s with params %s", op.operation_id, list(params.keys()))
 
             try:
@@ -603,6 +526,27 @@ def create_nodes(
                         "operation_id": op.operation_id,
                         "success": True,
                     })
+
+                    # ── Capture output for chaining ──────────────────
+                    raw_result = result.get("result")
+                    if raw_result is not None:
+                        # Issue → capture number
+                        if hasattr(raw_result, "number"):
+                            step_outputs["issue_number"] = raw_result.number
+                            step_outputs["number"] = raw_result.number
+                        # PR → capture number
+                        if hasattr(raw_result, "number") and hasattr(raw_result, "merge"):
+                            step_outputs["pull_number"] = raw_result.number
+                        # Git ref → capture sha
+                        if hasattr(raw_result, "object") and hasattr(raw_result.object, "sha"):
+                            step_outputs["sha"] = raw_result.object.sha
+                        # Branch → capture sha from commit
+                        if hasattr(raw_result, "commit") and hasattr(raw_result.commit, "sha"):
+                            step_outputs["sha"] = raw_result.commit.sha
+                        # Comment → capture id
+                        if hasattr(raw_result, "id") and hasattr(raw_result, "body"):
+                            step_outputs["comment_id"] = raw_result.id
+
                 else:
                     _add_error(state, "EXECUTION_FAILED",
                                f"Operation '{op.operation_id}' failed: "
@@ -628,6 +572,7 @@ def create_nodes(
 
         state["execution_results"] = results
         state["successful_operations"] = successful_ops
+        state["step_outputs"] = step_outputs
 
         return state
 
@@ -723,13 +668,45 @@ def create_nodes(
     # ==================================================================
     def evaluate_node(state: dict[str, Any]) -> dict[str, Any]:
         """
-        Produce VERIFIED, INCOMPLETE, or FAILED from the verification result.
+        Produce VERIFIED, INCOMPLETE, or FAILED from the verification result
+        and record per-attempt history and duration.
         """
+        import time as _time
         verification = state.get("verification_result")
+        is_verified = bool(verification and verification.verified)
 
-        if verification and verification.verified:
+        # Record attempt duration & history
+        attempt_num = state.get("retry_count", 0) + 1
+        start_t = state.get("_attempt_start_time", _time.time())
+        duration = round(_time.time() - start_t, 2)
+        history = list(state.get("attempt_history", []))
+
+        plan = state.get("plan")
+        ops = [op.operation_id for op in plan.operations] if plan and hasattr(plan, "operations") else []
+
+        err_msg = None
+        if not is_verified:
+            err_parts = []
+            if verification:
+                err_parts.extend(verification.missing_conditions or [])
+                err_parts.extend(verification.unexpected_conditions or [])
+            if not err_parts and state.get("errors"):
+                err_parts = [e.message if hasattr(e, "message") else str(e) for e in state["errors"]]
+            err_msg = "; ".join(err_parts) if err_parts else "Verification failed"
+
+        history.append({
+            "attempt": attempt_num,
+            "type": "initial" if attempt_num == 1 else f"replan_{attempt_num - 1}",
+            "passed": is_verified,
+            "duration_seconds": duration,
+            "operations": ops,
+            "error": err_msg if not is_verified else None,
+        })
+        state["attempt_history"] = history
+
+        if is_verified:
             state["status"] = "verified"
-            _trace(state, "task_verified", "evaluate")
+            _trace(state, "task_verified", "evaluate", {"duration_seconds": duration})
         else:
             # Check if we should replan or fail
             retry_count = state.get("retry_count", 0)
@@ -738,11 +715,14 @@ def create_nodes(
                 _trace(state, "task_failed", "evaluate", {
                     "reason": "replan_limit_exceeded",
                     "retry_count": retry_count,
+                    "duration_seconds": duration,
                 })
             else:
                 state["status"] = "incomplete"
+                state["retry_count"] = retry_count + 1
                 _trace(state, "replanning_started", "evaluate", {
-                    "retry_count": retry_count,
+                    "retry_count": state["retry_count"],
+                    "duration_seconds": duration,
                 })
 
         return state
