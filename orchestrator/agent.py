@@ -235,6 +235,7 @@ class OrchestrationAgent:
                 e.model_dump() if hasattr(e, "model_dump") else e
                 for e in state.get("errors", [])
             ],
+            "attempt_history": state.get("attempt_history", []),
             "trace": [
                 t.model_dump() if hasattr(t, "model_dump") else t
                 for t in state.get("trace", [])

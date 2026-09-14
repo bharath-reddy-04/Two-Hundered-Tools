@@ -39,6 +39,14 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+# Ensure stdout and stderr support unicode symbols on Windows
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, Exception):
+        pass
+
 from dotenv import load_dotenv
 
 # Load .env on import so configuration is immediately available
@@ -510,6 +518,22 @@ def run_task(
     else:
         final_status = "FAIL"
 
+    raw_orch = agent_result.get("raw_orchestration", {})
+    attempt_history = raw_orch.get("attempt_history") if isinstance(raw_orch, dict) else []
+
+    if not attempt_history:
+        ops_used = [tc.get("operation_id") for tc in agent_result.get("tool_calls", []) if isinstance(tc, dict)]
+        attempt_history = [
+            {
+                "attempt": 1,
+                "type": "initial",
+                "passed": final_passed,
+                "duration_seconds": duration_seconds,
+                "operations": ops_used,
+                "error": last_error if not final_passed else None,
+            }
+        ]
+
     return {
         "task_id": task_id,
         "instruction": instruction,
@@ -522,7 +546,8 @@ def run_task(
         "verification": verification,
         "error": last_error,
         "duration_seconds": duration_seconds,
-        "attempts": attempts,
+        "attempts": len(attempt_history) if attempt_history else attempts,
+        "attempt_history": attempt_history,
     }
 
 
@@ -548,7 +573,7 @@ def save_results(
 
 
 def print_task_progress(index: int, total: int, result: Dict[str, Any]) -> None:
-    """Print live progress output for a single task execution."""
+    """Print live progress output for a single task execution including per-attempt duration."""
     task_id = result["task_id"]
     difficulty = result.get("difficulty", "unknown").capitalize()
     status = result["status"]
@@ -556,6 +581,7 @@ def print_task_progress(index: int, total: int, result: Dict[str, Any]) -> None:
     instruction = result["instruction"]
     short_instruction = (instruction[:75] + "…") if len(instruction) > 75 else instruction
     tool_calls = result.get("tool_calls", [])
+    attempt_history = result.get("attempt_history", [])
 
     # Status formatting
     status_symbol = {
@@ -565,16 +591,42 @@ def print_task_progress(index: int, total: int, result: Dict[str, Any]) -> None:
         "NO_VERIFIER": "? NO_VERIFIER",
     }.get(status, status)
 
-    ops_used = [tc.get("operation_id", "?") for tc in tool_calls]
+    ops_used = [tc.get("operation_id", "?") for tc in tool_calls if isinstance(tc, dict)]
     ops_summary = f"{len(tool_calls)} call(s)" + (f" [{', '.join(ops_used)}]" if ops_used else "")
 
     print(f"[{index}/{total}] {task_id} ({difficulty})")
     print(f"  Instruction: {short_instruction}")
-    print(f"  Agent:       {ops_summary}")
-    print(f"  Verifier:    {status_symbol}")
-    if result.get("error") and status != "PASS":
-        print(f"  Reason:      {result['error']}")
-    print(f"  Duration:    {duration:.2f}s\n")
+
+    if len(attempt_history) > 1:
+        for att in attempt_history:
+            att_num = att.get("attempt", 1)
+            att_label = "Attempt 1" if att_num == 1 else f"Replan {att_num - 1}"
+            att_ops = att.get("operations", [])
+            att_ops_str = f"[{', '.join(att_ops)}]" if att_ops else "[]"
+            att_dur = att.get("duration_seconds", 0.0)
+            if att.get("passed"):
+                print(f"  {att_label + ':':<13} {att_ops_str} → ✓ PASS ({att_dur:.2f}s)")
+            else:
+                att_err = att.get("error") or "Failed"
+                if len(att_err) > 60:
+                    att_err = att_err[:57] + "…"
+                print(f"  {att_label + ':':<13} {att_ops_str} → ! FAIL ({att_dur:.2f}s) - {att_err}")
+        print(f"  Total:        {status_symbol} ({len(attempt_history)} attempts, {duration:.2f}s)\n")
+    elif attempt_history:
+        att = attempt_history[0]
+        att_ops = att.get("operations", [])
+        att_ops_str = f"[{', '.join(att_ops)}]" if att_ops else (f"[{', '.join(ops_used)}]" if ops_used else "[]")
+        att_dur = att.get("duration_seconds", duration)
+        print(f"  Attempt 1:    {att_ops_str} → {status_symbol} ({att_dur:.2f}s)")
+        if result.get("error") and status != "PASS":
+            print(f"  Reason:       {result['error']}")
+        print(f"  Total:        {status_symbol} (1 attempt, {duration:.2f}s)\n")
+    else:
+        print(f"  Agent:        {ops_summary}")
+        print(f"  Verifier:     {status_symbol}")
+        if result.get("error") and status != "PASS":
+            print(f"  Reason:       {result['error']}")
+        print(f"  Duration:     {duration:.2f}s\n")
 
 
 def print_summary(summary: Dict[str, Any], results: List[Dict[str, Any]]) -> None:

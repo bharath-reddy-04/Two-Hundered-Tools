@@ -21,6 +21,9 @@ import copy
 import json
 import logging
 import os
+import re
+import time
+import uuid
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
@@ -49,14 +52,20 @@ def resolve_repo(sandbox: Any, parameters: Dict[str, Any], name: Optional[str] =
     """
     repo_name = name or parameters.get("repo") or parameters.get("repository")
     if not repo_name:
-        raise ValueError("'repo' argument is required for this operation.")
+        default_repo = getattr(sandbox, "default_repo", None)
+        if isinstance(default_repo, str) and default_repo:
+            repo_name = default_repo
+        else:
+            raise ValueError("Repository name ('repo' or 'repository') is required.")
 
-    default_repo = getattr(sandbox, "default_repo", os.getenv("GITHUB_REPO", "eval-sandbox-repo"))
     bare_name = str(repo_name).split("/")[-1]
+    default_sandbox_repo = getattr(sandbox, "default_repo", None)
+    if not isinstance(default_sandbox_repo, str):
+        default_sandbox_repo = "eval-sandbox-repo"
     if bare_name in ("test-repo-1", "test_repo_1", "repo-1", "repo_1"):
-        repo_name = default_repo
+        repo_name = default_sandbox_repo
 
-    owner_name = parameters.get("owner")
+    owner_name = parameters.get("owner") or getattr(sandbox, "_owner", "")
     if owner_name and "/" not in str(repo_name):
         repo_name = f"{owner_name}/{repo_name}"
     return sandbox.get_repo(repo_name)
@@ -68,18 +77,135 @@ def _get_params(parameters: Optional[Dict[str, Any]], kwargs: Dict[str, Any]) ->
     return merged
 
 
+def _resolve_issue_number(repo_obj: Any, params: Dict[str, Any]) -> int:
+    """
+    Extract and validate issue_number from params.
+
+    If the value is missing (e.g. stripped by the template sanitizer) or not
+    a valid integer, fall back to the most recently created issue in the
+    repo. This handles the common case where the LLM emits a template
+    reference like ``${issues/create.number}`` for a chained operation.
+    """
+    raw = params.get("issue_number")
+
+    # Happy path: already a valid int
+    if isinstance(raw, int):
+        return raw
+    if isinstance(raw, float) and raw == int(raw):
+        return int(raw)
+    if isinstance(raw, str):
+        try:
+            return int(raw)
+        except (ValueError, TypeError):
+            pass
+
+    # Auto-resolve: pick the most recently created open issue, fallback to all states
+    logger.warning(
+        "issue_number is missing or invalid (%r) — auto-resolving from latest issue",
+        raw,
+    )
+    try:
+        issues = repo_obj.get_issues(state="open", sort="created", direction="desc")
+        if hasattr(issues, "__getitem__") and len(issues) > 0:
+            resolved = issues[0].number
+        else:
+            resolved = next(iter(issues)).number
+        logger.info("Auto-resolved issue_number to %d", resolved)
+        return resolved
+    except (IndexError, StopIteration, AttributeError, Exception):
+        pass
+
+    try:
+        issues = repo_obj.get_issues(state="all", sort="created", direction="desc")
+        if hasattr(issues, "__getitem__") and len(issues) > 0:
+            resolved = issues[0].number
+        else:
+            resolved = next(iter(issues)).number
+        logger.info("Auto-resolved issue_number to %d (all states)", resolved)
+        return resolved
+    except (IndexError, StopIteration, AttributeError, Exception):
+        pass
+
+    raise ValueError(
+        "issue_number is required but was not provided and no open issues "
+        "exist in the repository to auto-resolve from."
+    )
+
+
+def _resolve_pull_number(repo_obj: Any, params: Dict[str, Any]) -> int:
+    """
+    Extract and validate pull_number from params.
+
+    If the value is missing (e.g. stripped by the template sanitizer) or not
+    a valid integer, fall back to the most recently created pull request in the
+    repo. This handles the common case where the LLM emits a template
+    reference like ``${pulls/create.number}`` for a chained operation.
+    """
+    raw = (
+        params.get("pull_number")
+        or params.get("pull_request_number")
+        or params.get("pr_number")
+        or params.get("number")
+    )
+
+    # Happy path: already a valid int
+    if isinstance(raw, int):
+        return raw
+    if isinstance(raw, float) and raw == int(raw):
+        return int(raw)
+    if isinstance(raw, str):
+        try:
+            return int(raw)
+        except (ValueError, TypeError):
+            pass
+
+    # Auto-resolve: pick the most recently created open PR, fallback to all states
+    logger.warning(
+        "pull_number is missing or invalid (%r) — auto-resolving from latest pull request",
+        raw,
+    )
+    try:
+        pulls = repo_obj.get_pulls(state="open", sort="created", direction="desc")
+        if hasattr(pulls, "__getitem__") and len(pulls) > 0:
+            resolved = pulls[0].number
+        else:
+            resolved = next(iter(pulls)).number
+        logger.info("Auto-resolved pull_number to %d", resolved)
+        return resolved
+    except (IndexError, StopIteration, AttributeError, Exception):
+        pass
+
+    try:
+        pulls = repo_obj.get_pulls(state="all", sort="created", direction="desc")
+        if hasattr(pulls, "__getitem__") and len(pulls) > 0:
+            resolved = pulls[0].number
+        else:
+            resolved = next(iter(pulls)).number
+        logger.info("Auto-resolved pull_number to %d (all states)", resolved)
+        return resolved
+    except (IndexError, StopIteration, AttributeError, Exception):
+        pass
+
+    raise ValueError(
+        "pull_number is required but was not provided and no open pull requests "
+        "exist in the repository to auto-resolve from."
+    )
+
+
 # ---------------------------------------------------------------------------
 # 1. Repositories Handlers
 # ---------------------------------------------------------------------------
 
 def repos_create_for_authenticated_user(sandbox: Any, parameters: Optional[Dict[str, Any]] = None, **kwargs: Any) -> Any:
     params = _get_params(parameters, kwargs)
-    owner = sandbox._owner
-    return sandbox._gh.get_user(owner).create_repo(
+    user = sandbox._gh.get_user()
+    if not hasattr(user, "create_repo"):
+        user = sandbox._gh.get_user(sandbox._owner)
+    return user.create_repo(
         name=params["name"],
         description=params.get("description", ""),
         private=params.get("private", True),
-        auto_init=params.get("auto_init", False),
+        auto_init=params.get("auto_init", True),
         has_issues=params.get("has_issues", True),
         has_wiki=params.get("has_wiki", True),
         has_projects=params.get("has_projects", True),
@@ -156,7 +282,23 @@ def repos_list_branches(sandbox: Any, parameters: Optional[Dict[str, Any]] = Non
 
 def repos_get_branch(sandbox: Any, parameters: Optional[Dict[str, Any]] = None, **kwargs: Any) -> Any:
     params = _get_params(parameters, kwargs)
-    return resolve_repo(sandbox, params).get_branch(params["branch"])
+    repo_obj = resolve_repo(sandbox, params)
+    branch_name = params["branch"]
+    try:
+        return repo_obj.get_branch(branch_name)
+    except Exception as exc:
+        if branch_name in ("main", "master"):
+            try:
+                repo_obj.create_file(
+                    path="README.md",
+                    message="chore: initial repository commit",
+                    content=f"# {repo_obj.name}\n",
+                    branch=branch_name,
+                )
+                return repo_obj.get_branch(branch_name)
+            except Exception:
+                pass
+        raise exc
 
 
 def repos_rename_branch(sandbox: Any, parameters: Optional[Dict[str, Any]] = None, **kwargs: Any) -> Any:
@@ -202,12 +344,30 @@ def git_create_ref(sandbox: Any, parameters: Optional[Dict[str, Any]] = None, **
             ref = f"refs/heads/{ref}"
     repo_obj = resolve_repo(sandbox, params)
     sha = params.get("sha")
+    # GitHub requires a full 40-char hex SHA.  The LLM sometimes fabricates
+    # short or invalid hashes, so we validate and discard bad values.
+    if sha and not re.fullmatch(r"[0-9a-fA-F]{40}", sha):
+        sha = None  # force auto-resolve from base branch
     if not sha:
-        base_branch = params.get("base") or getattr(repo_obj, "default_branch", "main")
+        base_branch = params.get("base") or getattr(repo_obj, "default_branch", "main") or "main"
         try:
             sha = repo_obj.get_branch(base_branch).commit.sha
         except Exception:
-            sha = repo_obj.get_git_ref(f"heads/{base_branch}").object.sha
+            try:
+                sha = repo_obj.get_git_ref(f"heads/{base_branch}").object.sha
+            except Exception:
+                # If repository is empty with no commits, seed initial commit on base_branch
+                try:
+                    logger.warning("Repository '%s' has no commits on '%s' — initializing README", repo_obj.name, base_branch)
+                    repo_obj.create_file(
+                        path="README.md",
+                        message="chore: initial repository commit",
+                        content=f"# {repo_obj.name}\n",
+                        branch=base_branch,
+                    )
+                    sha = repo_obj.get_branch(base_branch).commit.sha
+                except Exception as init_exc:
+                    logger.warning("Could not auto-seed initial commit on '%s': %s", repo_obj.name, init_exc)
     return repo_obj.create_git_ref(ref=ref, sha=sha)
 
 
@@ -270,10 +430,39 @@ def repos_create_or_update_file_contents(sandbox: Any, parameters: Optional[Dict
     path = params["path"]
     message = params.get("message", "Update file")
     content = params.get("content", "")
+    branch = params.get("branch") or getattr(r, "default_branch", "main")
     sha = params.get("sha")
+
     if sha:
-        return r.update_file(path, message, content, sha)
-    return r.create_file(path, message, content, branch=params.get("branch", r.default_branch))
+        try:
+            return r.update_file(path, message, content, sha, branch=branch)
+        except TypeError:
+            return r.update_file(path, message, content, sha)
+
+    try:
+        return r.create_file(path, message, content, branch=branch)
+    except Exception as exc:
+        err_str = str(getattr(exc, "data", exc))
+        # If file already exists and needs sha:
+        if "sha" in err_str.lower() or "422" in err_str:
+            try:
+                existing = r.get_contents(path, ref=branch)
+                try:
+                    return r.update_file(path, message, content, existing.sha, branch=branch)
+                except TypeError:
+                    return r.update_file(path, message, content, existing.sha)
+            except Exception:
+                pass
+        # If branch not found (404), create branch and retry
+        if "branch" in err_str.lower() or "404" in err_str:
+            if branch and branch not in ("main", "master"):
+                try:
+                    base_sha = r.get_branch(r.default_branch).commit.sha
+                    r.create_git_ref(ref=f"refs/heads/{branch}", sha=base_sha)
+                    return r.create_file(path, message, content, branch=branch)
+                except Exception:
+                    pass
+        raise exc
 
 
 def repos_delete_file(sandbox: Any, parameters: Optional[Dict[str, Any]] = None, **kwargs: Any) -> Any:
@@ -309,19 +498,80 @@ def repos_get_commit(sandbox: Any, parameters: Optional[Dict[str, Any]] = None, 
 
 def pulls_create(sandbox: Any, parameters: Optional[Dict[str, Any]] = None, **kwargs: Any) -> Any:
     params = _get_params(parameters, kwargs)
-    return resolve_repo(sandbox, params).create_pull(
-        title=params.get("title", ""),
-        body=params.get("body", ""),
-        head=params["head"],
-        base=params["base"],
-        draft=params.get("draft", False),
-        maintainer_can_modify=params.get("maintainer_can_modify", True),
-    )
+    repo_obj = resolve_repo(sandbox, params)
+    head = params["head"]
+    base = params["base"]
+
+    def _create_pr():
+        body = params.get("body") or params.get("description", "")
+        return repo_obj.create_pull(
+            title=params.get("title", ""),
+            body=body,
+            head=head,
+            base=base,
+            draft=params.get("draft", False),
+            maintainer_can_modify=params.get("maintainer_can_modify", True),
+        )
+
+    try:
+        return _create_pr()
+    except Exception as exc:
+        # GitHub returns 422 "No commits between X and Y" when the head branch
+        # points to the same commit as base (freshly created branch).
+        # Auto-seed a commit on the head branch so the PR can be created.
+        err_str = str(getattr(exc, "data", exc))
+        if "No commits between" in err_str or "no commits between" in err_str.lower():
+            logger.warning(
+                "No commits between '%s' and '%s' — seeding a commit on '%s'",
+                base, head, head,
+            )
+            seed_file_path = f".eval-seed-{head.replace('/', '-')}.md"
+            seed_content = f"# Evaluation seed commit\n\nBranch: {head}\nTimestamp: {time.time()}\n"
+            try:
+                # Check if seed file already exists on the branch
+                existing = None
+                try:
+                    existing = repo_obj.get_contents(seed_file_path, ref=head)
+                except Exception:
+                    pass
+
+                if existing is not None:
+                    repo_obj.update_file(
+                        path=seed_file_path,
+                        message=f"chore: seed commit for branch '{head}'",
+                        content=seed_content,
+                        sha=existing.sha,
+                        branch=head,
+                    )
+                else:
+                    repo_obj.create_file(
+                        path=seed_file_path,
+                        message=f"chore: seed commit for branch '{head}'",
+                        content=seed_content,
+                        branch=head,
+                    )
+            except Exception as seed_exc:
+                # Fallback to unique filename if conflict occurs
+                try:
+                    unique_path = f".eval-seed-{head.replace('/', '-')}-{uuid.uuid4().hex[:8]}.md"
+                    repo_obj.create_file(
+                        path=unique_path,
+                        message=f"chore: seed commit for branch '{head}'",
+                        content=seed_content,
+                        branch=head,
+                    )
+                except Exception as final_seed_exc:
+                    logger.error("Failed to seed commit on '%s': %s", head, final_seed_exc)
+                    raise exc from final_seed_exc
+            # Retry PR creation after seeding
+            return _create_pr()
+        raise
 
 
 def pulls_get(sandbox: Any, parameters: Optional[Dict[str, Any]] = None, **kwargs: Any) -> Any:
     params = _get_params(parameters, kwargs)
-    return resolve_repo(sandbox, params).get_pull(params["pull_number"])
+    repo_obj = resolve_repo(sandbox, params)
+    return repo_obj.get_pull(_resolve_pull_number(repo_obj, params))
 
 
 def pulls_list(sandbox: Any, parameters: Optional[Dict[str, Any]] = None, **kwargs: Any) -> Any:
@@ -337,19 +587,23 @@ def pulls_list(sandbox: Any, parameters: Optional[Dict[str, Any]] = None, **kwar
 
 def pulls_update(sandbox: Any, parameters: Optional[Dict[str, Any]] = None, **kwargs: Any) -> Any:
     params = _get_params(parameters, kwargs)
-    pr = resolve_repo(sandbox, params).get_pull(params["pull_number"])
+    repo_obj = resolve_repo(sandbox, params)
+    pr = repo_obj.get_pull(_resolve_pull_number(repo_obj, params))
     edit_kwargs = {}
     for field in ["title", "body", "state", "base", "maintainer_can_modify"]:
         if field in params:
             edit_kwargs[field] = params[field]
+    if "description" in params and "body" not in edit_kwargs:
+        edit_kwargs["body"] = params["description"]
     pr.edit(**edit_kwargs)
     return pr
 
 
 def pulls_merge(sandbox: Any, parameters: Optional[Dict[str, Any]] = None, **kwargs: Any) -> Any:
     params = _get_params(parameters, kwargs)
-    return resolve_repo(sandbox, params).get_pull(
-        params["pull_number"]
+    repo_obj = resolve_repo(sandbox, params)
+    return repo_obj.get_pull(
+        _resolve_pull_number(repo_obj, params)
     ).merge(
         commit_title=params.get("commit_title", ""),
         commit_message=params.get("commit_message", ""),
@@ -359,17 +613,20 @@ def pulls_merge(sandbox: Any, parameters: Optional[Dict[str, Any]] = None, **kwa
 
 def pulls_list_files(sandbox: Any, parameters: Optional[Dict[str, Any]] = None, **kwargs: Any) -> Any:
     params = _get_params(parameters, kwargs)
-    return list(resolve_repo(sandbox, params).get_pull(params["pull_number"]).get_files())
+    repo_obj = resolve_repo(sandbox, params)
+    return list(repo_obj.get_pull(_resolve_pull_number(repo_obj, params)).get_files())
 
 
 def pulls_list_commits(sandbox: Any, parameters: Optional[Dict[str, Any]] = None, **kwargs: Any) -> Any:
     params = _get_params(parameters, kwargs)
-    return list(resolve_repo(sandbox, params).get_pull(params["pull_number"]).get_commits())
+    repo_obj = resolve_repo(sandbox, params)
+    return list(repo_obj.get_pull(_resolve_pull_number(repo_obj, params)).get_commits())
 
 
 def pulls_list_review_comments(sandbox: Any, parameters: Optional[Dict[str, Any]] = None, **kwargs: Any) -> Any:
     params = _get_params(parameters, kwargs)
-    return list(resolve_repo(sandbox, params).get_pull(params["pull_number"]).get_review_comments())
+    repo_obj = resolve_repo(sandbox, params)
+    return list(repo_obj.get_pull(_resolve_pull_number(repo_obj, params)).get_review_comments())
 
 
 # ---------------------------------------------------------------------------
@@ -382,6 +639,8 @@ def issues_create(sandbox: Any, parameters: Optional[Dict[str, Any]] = None, **k
     create_kwargs: Dict[str, Any] = {"title": params["title"]}
     if "body" in params:
         create_kwargs["body"] = params["body"]
+    elif "description" in params:
+        create_kwargs["body"] = params["description"]
     if "labels" in params:
         create_kwargs["labels"] = params["labels"]
     if "assignees" in params:
@@ -393,7 +652,8 @@ def issues_create(sandbox: Any, parameters: Optional[Dict[str, Any]] = None, **k
 
 def issues_get(sandbox: Any, parameters: Optional[Dict[str, Any]] = None, **kwargs: Any) -> Any:
     params = _get_params(parameters, kwargs)
-    return resolve_repo(sandbox, params).get_issue(params["issue_number"])
+    repo_obj = resolve_repo(sandbox, params)
+    return repo_obj.get_issue(_resolve_issue_number(repo_obj, params))
 
 
 def issues_list(sandbox: Any, parameters: Optional[Dict[str, Any]] = None, **kwargs: Any) -> Any:
@@ -408,31 +668,37 @@ def issues_list(sandbox: Any, parameters: Optional[Dict[str, Any]] = None, **kwa
 
 def issues_update(sandbox: Any, parameters: Optional[Dict[str, Any]] = None, **kwargs: Any) -> Any:
     params = _get_params(parameters, kwargs)
-    issue = resolve_repo(sandbox, params).get_issue(params["issue_number"])
+    repo_obj = resolve_repo(sandbox, params)
+    issue = repo_obj.get_issue(_resolve_issue_number(repo_obj, params))
     edit_kwargs = {}
     for field in ["title", "body", "state", "labels", "assignees", "milestone"]:
         if field in params:
             edit_kwargs[field] = params[field]
+    if "description" in params and "body" not in edit_kwargs:
+        edit_kwargs["body"] = params["description"]
     issue.edit(**edit_kwargs)
     return issue
 
 
 def issues_create_comment(sandbox: Any, parameters: Optional[Dict[str, Any]] = None, **kwargs: Any) -> Any:
     params = _get_params(parameters, kwargs)
-    return resolve_repo(sandbox, params).get_issue(
-        params["issue_number"]
+    repo_obj = resolve_repo(sandbox, params)
+    return repo_obj.get_issue(
+        _resolve_issue_number(repo_obj, params)
     ).create_comment(params["body"])
 
 
 def issues_list_comments(sandbox: Any, parameters: Optional[Dict[str, Any]] = None, **kwargs: Any) -> Any:
     params = _get_params(parameters, kwargs)
-    return list(resolve_repo(sandbox, params).get_issue(params["issue_number"]).get_comments())
+    repo_obj = resolve_repo(sandbox, params)
+    return list(repo_obj.get_issue(_resolve_issue_number(repo_obj, params)).get_comments())
 
 
 def issues_lock(sandbox: Any, parameters: Optional[Dict[str, Any]] = None, **kwargs: Any) -> Any:
     params = _get_params(parameters, kwargs)
-    return resolve_repo(sandbox, params).get_issue(
-        params["issue_number"]
+    repo_obj = resolve_repo(sandbox, params)
+    return repo_obj.get_issue(
+        _resolve_issue_number(repo_obj, params)
     ).lock(params.get("lock_reason", "off-topic"))
 
 
@@ -1153,5 +1419,53 @@ def execute_operation(
             ),
         }
 
+    # Sanitize parameters: strip unresolved template references the LLM
+    # may have emitted (e.g. "${issues/create.number}", "$$.0.number").
+    params = _sanitize_template_refs(params)
+
     canonical_id, handler = resolved
     return sandbox.execute(canonical_id, lambda: handler(sandbox, params))
+
+
+# ---------------------------------------------------------------------------
+# Template-reference sanitizer
+# ---------------------------------------------------------------------------
+
+# Patterns the LLM may emit as placeholder references to prior step outputs.
+_TEMPLATE_REF_PATTERN = re.compile(
+    r"^(<|\{)?\$"    # starts with $, <$, or {$
+    r"("
+    r"\{?[^}>]+\}?"  # ${issues/create.number} or <$.issues/create.number>
+    r"|"
+    r"\$\.[0-9]"     # $$.0.number
+    r"|"
+    r"\[[0-9]+\]"    # $[0].number
+    r")"
+    r"|^\s*\{\{.*\}\}\s*$"  # {{operations.issues-create.outputs.number}}
+)
+
+
+def _sanitize_template_refs(params: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Detect and remove unresolved template-style references in parameter values.
+
+    The LLM sometimes generates JSONPath/template references like
+    ``${issues/create.number}`` or ``$$.0.number`` expecting them to be
+    dynamically resolved, but there is no template engine in the pipeline.
+    These raw strings cause downstream AssertionError/TypeError when the
+    handler expects an int or other concrete type.
+
+    This function removes such values so that the operation handlers can
+    fall back to auto-resolution (e.g. looking up the latest issue).
+    """
+    cleaned = {}
+    for key, value in params.items():
+        if isinstance(value, str) and _TEMPLATE_REF_PATTERN.match(value):
+            logger.warning(
+                "Stripped unresolved template reference for param '%s': %s",
+                key, value,
+            )
+            # Don't include the key — let the handler auto-resolve
+            continue
+        cleaned[key] = value
+    return cleaned

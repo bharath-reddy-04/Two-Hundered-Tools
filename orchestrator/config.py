@@ -53,10 +53,12 @@ IRREVERSIBLE_OPERATIONS: frozenset[str] = frozenset({
 # Supported disclosure modes
 # ---------------------------------------------------------------------------
 
-SUPPORTED_DISCLOSURE_MODES = ("all_loaded",)
+SUPPORTED_DISCLOSURE_MODES = (
+    "all_loaded",
+    "category_gated",
+)
 
 DEFERRED_DISCLOSURE_MODES = (
-    "category_gated",
     "search_then_load",
     "hierarchical_planner",
 )
@@ -72,8 +74,9 @@ class OrchestratorConfig:
 
     max_replans: int = 2
     disclosure_mode: str = "all_loaded"
+    auto_approve: bool = True
     default_model: str = field(
-        default_factory=lambda: os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+        default_factory=lambda: (os.getenv("GEMINI_MODEL") or "gemini-3.1-flash-lite").strip()
     )
     checkpointer: Any = None  # set to MemorySaver() by agent.py if None
 

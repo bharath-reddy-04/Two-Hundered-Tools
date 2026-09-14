@@ -96,9 +96,12 @@ def build_graph(
     builder.add_edge("validate_plan", "dry_run")
 
     # Conditional edges after dry_run
+    def _dry_run_router(state: dict[str, Any]) -> str:
+        return route_after_dry_run(state, config=config)
+
     builder.add_conditional_edges(
         "dry_run",
-        route_after_dry_run,
+        _dry_run_router,
         {
             "approve": "approve",
             "execute": "execute",

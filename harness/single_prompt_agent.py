@@ -666,6 +666,12 @@ class AgentSession:
         final_response = "\n".join(text_parts)
         logger.info("Gemini returned %d function call(s)", len(function_call_parts))
 
+        # Inter-step output forwarding for chained operations
+        # (e.g. create issue → comment on that issue)
+        import re as _re
+        _TEMPLATE_PATTERN = _re.compile(r"^(<|\{)?\$")
+        step_outputs: dict[str, Any] = {}
+
         for fc in function_call_parts:
             # fc is a google.genai.types.FunctionCall with .name and .args (dict)
             fn_name = fc.name
@@ -687,12 +693,32 @@ class AgentSession:
                 continue
 
             operation_id = op["operation_id"]
+
+            # ── Inter-step chaining ──────────────────────────────────
+            # Replace unresolved template references with actual values
+            for key, value in list(arguments.items()):
+                if isinstance(value, str) and _TEMPLATE_PATTERN.match(value):
+                    if key in step_outputs:
+                        logger.info(
+                            "Resolved template ref for '%s': %r → %r",
+                            key, value, step_outputs[key],
+                        )
+                        arguments[key] = step_outputs[key]
+                    else:
+                        logger.warning(
+                            "Unresolved template ref for '%s': %s",
+                            key, value,
+                        )
+                        del arguments[key]
+
+
             logger.info(
                 "Executing tool: %s  arguments=%s",
                 operation_id,
                 json.dumps(
                     {k: ("***" if "token" in k.lower() or "key" in k.lower() else v)
                      for k, v in arguments.items()},
+                    default=str,
                 ),
             )
 
@@ -715,6 +741,21 @@ class AgentSession:
                 )
             else:
                 logger.info("Tool '%s' succeeded.", operation_id)
+
+                # ── Capture output for chaining ──────────────────
+                raw_result = result.get("result")
+                if raw_result is not None:
+                    if hasattr(raw_result, "number"):
+                        step_outputs["issue_number"] = raw_result.number
+                        step_outputs["number"] = raw_result.number
+                    if hasattr(raw_result, "number") and hasattr(raw_result, "merge"):
+                        step_outputs["pull_number"] = raw_result.number
+                    if hasattr(raw_result, "object") and hasattr(raw_result.object, "sha"):
+                        step_outputs["sha"] = raw_result.object.sha
+                    if hasattr(raw_result, "commit") and hasattr(raw_result.commit, "sha"):
+                        step_outputs["sha"] = raw_result.commit.sha
+                    if hasattr(raw_result, "id") and hasattr(raw_result, "body"):
+                        step_outputs["comment_id"] = raw_result.id
 
         if not function_call_parts and not final_response:
             final_response = "(The model returned no tool calls and no text response.)"

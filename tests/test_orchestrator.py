@@ -146,10 +146,20 @@ class TestOperationRegistry(unittest.TestCase):
             if op is not None:
                 self.assertTrue(op.is_irreversible, f"{op_id} should be irreversible")
 
-    def test_operation_registry_get_by_category_raises(self) -> None:
-        """Deferred: get_by_category should raise NotImplementedError."""
-        with self.assertRaises(NotImplementedError):
-            self.registry.get_by_category("repos")
+    def test_operation_registry_get_by_category_returns_results(self) -> None:
+        """get_by_category is now implemented and returns matching operations."""
+        results = self.registry.get_by_category("repos")
+        self.assertIsInstance(results, list)
+        self.assertGreater(len(results), 0, "'repos' category must have at least one op")
+        for op in results:
+            self.assertEqual(op.category.lower(), "repos")
+
+    def test_operation_registry_get_all_categories(self) -> None:
+        """get_all_categories returns a sorted non-empty list."""
+        cats = self.registry.get_all_categories()
+        self.assertIsInstance(cats, list)
+        self.assertGreater(len(cats), 0)
+        self.assertEqual(cats, sorted(cats), "categories must be sorted")
 
     def test_operation_registry_search_raises(self) -> None:
         """Deferred: search should raise NotImplementedError."""
@@ -227,10 +237,14 @@ class TestPlanNode(unittest.TestCase):
         self.assertIsNotNone(result.get("plan"))
 
     def test_plan_node_rejects_unsupported_disclosure_mode(self) -> None:
-        """Plan node should raise NotImplementedError for deferred modes."""
+        """Plan node should raise NotImplementedError for deferred modes.
+
+        category_gated is now supported — only search_then_load and
+        hierarchical_planner remain deferred.
+        """
         nodes = self._make_nodes()
 
-        for mode in ("category_gated", "search_then_load", "hierarchical_planner"):
+        for mode in ("search_then_load", "hierarchical_planner"):
             state = _make_state(disclosure_mode=mode)
             with self.assertRaises(NotImplementedError, msg=f"Mode {mode} should raise"):
                 nodes["plan"](state)
@@ -599,7 +613,8 @@ class TestOrchestrationAgent(unittest.TestCase):
 
                 task = {"task_id": "test", "prompt": "test", "expected_state": {}}
 
-                for mode in ("category_gated", "search_then_load", "hierarchical_planner"):
+                # category_gated is now supported — only these two remain deferred
+                for mode in ("search_then_load", "hierarchical_planner"):
                     with self.assertRaises(NotImplementedError, msg=f"Mode {mode}"):
                         agent.run(task, "objective", disclosure_mode=mode)
 

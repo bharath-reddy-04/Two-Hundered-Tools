@@ -47,13 +47,17 @@ def reset_client() -> None:
     _client = None
 
 
+import time
+
 def generate(
     model: str,
     contents: list[dict[str, Any]],
     config: Any = None,
+    max_retries: int = 5,
 ) -> Any:
     """
-    Call the Gemini API and return the raw response.
+    Call the Gemini API and return the raw response, with automatic retry
+    and exponential backoff on 429 rate limits or transient errors.
 
     Parameters
     ----------
@@ -63,6 +67,8 @@ def generate(
         Gemini-style contents list.
     config : GenerateContentConfig, optional
         Full generation config (system_instruction, tools, etc.).
+    max_retries : int, optional
+        Maximum number of retries on 429/transient error (default: 5).
 
     Returns
     -------
@@ -77,4 +83,34 @@ def generate(
         kwargs["config"] = config
 
     logger.debug("LLM call: model=%s, contents_len=%d", model, len(contents))
-    return client.models.generate_content(**kwargs)
+
+    last_exc = None
+    for attempt in range(max_retries + 1):
+        try:
+            return client.models.generate_content(**kwargs)
+        except Exception as exc:
+            last_exc = exc
+            err_str = str(exc)
+            is_rate_limit = (
+                "429" in err_str
+                or "RESOURCE_EXHAUSTED" in err_str
+                or "ResourceExhausted" in err_str
+                or "rate limit" in err_str.lower()
+                or "quota" in err_str.lower()
+                or "503" in err_str
+                or "500" in err_str
+            )
+            if is_rate_limit and attempt < max_retries:
+                sleep_secs = max(4.0, (2 ** attempt) * 2.5)
+                logger.warning(
+                    "LLM call to %s rate-limited (%s). Retrying in %.1fs (attempt %d/%d)...",
+                    model,
+                    err_str[:120],
+                    sleep_secs,
+                    attempt + 1,
+                    max_retries,
+                )
+                time.sleep(sleep_secs)
+            else:
+                raise last_exc
+

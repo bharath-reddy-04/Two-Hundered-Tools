@@ -1,88 +1,1787 @@
 {
   "run_metadata": {
     "runner_version": "1.0.0",
-    "start_time": "2026-09-06T09:07:43.841740+00:00",
-    "end_time": "2026-09-06T09:07:55.636967+00:00",
-    "total_duration_seconds": 11.8,
-    "model": "gemini-3.1-flash-lite",
+    "start_time": "2026-09-09T18:42:38.845154+00:00",
+    "end_time": "2026-09-09T18:59:07.341986+00:00",
+    "total_duration_seconds": 988.5,
+    "model": "gemini-3.5-flash-lite",
     "target_repo": "bharath-rdy4/eval-sandbox-repo",
     "task_order": [
-      "task_03_create_branch"
+      "task_01_create_issue",
+      "task_02_create_issue_with_label",
+      "task_03_create_branch",
+      "task_04_create_branch_and_issue",
+      "task_05_create_issue_and_comment",
+      "task_06_create_and_update_issue",
+      "task_07_create_branch_and_pr",
+      "task_08_create_branch_issue_pr",
+      "task_09_branch_issue_pr_label",
+      "task_10_issue_label_comment_close",
+      "task_11_branch_pr_merge",
+      "task_12_repository_and_issue",
+      "task_13_repo_branch_issue_pr"
     ]
   },
   "summary": {
-    "total": 1,
-    "passed": 0,
-    "failed": 1,
+    "total": 13,
+    "passed": 13,
+    "failed": 0,
     "errors": 0,
     "no_verifier": 0,
-    "success_rate_percent": 0.0
+    "success_rate_percent": 100.0
   },
   "results": [
     {
-      "task_id": "task_03_create_branch",
-      "instruction": "Create a branch called 'eval-branch-003-feature-login' from 'main'.",
+      "task_id": "task_01_create_issue",
+      "instruction": "Create an issue titled 'eval-issue-001: Login bug' describing a problem where users cannot log in due to an invalid token error.",
       "difficulty": "easy",
-      "status": "FAIL",
-      "passed": false,
-      "agent_response": "",
+      "status": "PASS",
+      "passed": true,
+      "agent_response": "Status: verified, Verified: True",
       "tool_calls": [
         {
-          "function_name": "git__get_ref",
-          "operation_id": "git/get-ref",
+          "operation_id": "issues/create",
           "arguments": {
-            "ref": "heads/main",
             "owner": "bharath-rdy4",
-            "repo": "eval-sandbox-repo"
+            "repo": "eval-sandbox-repo",
+            "title": "eval-issue-001: Login bug",
+            "body": "Users cannot log in due to an invalid token error."
           }
         }
       ],
       "results": [
         {
+          "operation_id": "issues/create",
           "success": true,
-          "operation": "git/get-ref",
-          "result": "GitRef(ref=\"refs/heads/main\")",
-          "rate_limit_before": {
-            "limit": 5000,
-            "remaining": 5000,
-            "reset": "2026-09-06T10:07:48+00:00"
-          },
-          "rate_limit_after": {
-            "limit": 5000,
-            "remaining": 5000,
-            "reset": "2026-09-06T10:07:50+00:00"
-          }
+          "result": "Issue(title=\"eval-issue-001: Login bug\", number=279)",
+          "error": null,
+          "error_type": null
         }
       ],
       "verification": {
-        "passed": false,
+        "passed": true,
+        "resource": "multi_resource",
+        "identifier": "bharath-rdy4/eval-sandbox-repo",
+        "results": {
+          "issue": {
+            "passed": true,
+            "resource": "issue",
+            "identifier": 279,
+            "checks": {
+              "exists": true,
+              "title": true,
+              "body_contains": true,
+              "state": true
+            },
+            "expected_state": {
+              "exists": true,
+              "title": "eval-issue-001: Login bug",
+              "body_contains": "invalid token",
+              "state": "open"
+            },
+            "actual_state": {
+              "number": 279,
+              "title": "eval-issue-001: Login bug",
+              "body": "Users cannot log in due to an invalid token error.",
+              "body_contains": "Users cannot log in due to an invalid token error.",
+              "state": "open",
+              "locked": false,
+              "lock_reason": null,
+              "comments": 0,
+              "user": "bharath-rdy4",
+              "assignees": [],
+              "milestone": null,
+              "labels": []
+            },
+            "errors": []
+          }
+        },
+        "errors": []
+      },
+      "error": null,
+      "duration_seconds": 25.82,
+      "attempts": 1,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "type": "initial",
+          "passed": true,
+          "duration_seconds": 11.19,
+          "operations": [
+            "issues/create"
+          ],
+          "error": null
+        }
+      ]
+    },
+    {
+      "task_id": "task_02_create_issue_with_label",
+      "instruction": "Create an issue titled 'eval-issue-002: Login failure' describing a login failure and add the 'bug' label.",
+      "difficulty": "easy",
+      "status": "PASS",
+      "passed": true,
+      "agent_response": "Status: verified, Verified: True",
+      "tool_calls": [
+        {
+          "operation_id": "issues/create",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-sandbox-repo",
+            "title": "eval-issue-002: Login failure",
+            "body": "Users are experiencing login failures when attempting to authenticate.",
+            "labels": [
+              "bug"
+            ]
+          }
+        }
+      ],
+      "results": [
+        {
+          "operation_id": "issues/create",
+          "success": true,
+          "result": "Issue(title=\"eval-issue-002: Login failure\", number=280)",
+          "error": null,
+          "error_type": null
+        }
+      ],
+      "verification": {
+        "passed": true,
+        "resource": "multi_resource",
+        "identifier": "bharath-rdy4/eval-sandbox-repo",
+        "results": {
+          "issue": {
+            "passed": true,
+            "resource": "issue",
+            "identifier": 280,
+            "checks": {
+              "exists": true,
+              "title": true,
+              "state": true,
+              "labels": true
+            },
+            "expected_state": {
+              "exists": true,
+              "title": "eval-issue-002: Login failure",
+              "state": "open",
+              "labels": [
+                "bug"
+              ]
+            },
+            "actual_state": {
+              "number": 280,
+              "title": "eval-issue-002: Login failure",
+              "body": "Users are experiencing login failures when attempting to authenticate.",
+              "body_contains": "Users are experiencing login failures when attempting to authenticate.",
+              "state": "open",
+              "locked": false,
+              "lock_reason": null,
+              "comments": 0,
+              "user": "bharath-rdy4",
+              "assignees": [],
+              "milestone": null,
+              "labels": [
+                "bug"
+              ]
+            },
+            "errors": []
+          }
+        },
+        "errors": []
+      },
+      "error": null,
+      "duration_seconds": 19.85,
+      "attempts": 1,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "type": "initial",
+          "passed": true,
+          "duration_seconds": 9.14,
+          "operations": [
+            "issues/create"
+          ],
+          "error": null
+        }
+      ]
+    },
+    {
+      "task_id": "task_03_create_branch",
+      "instruction": "Create a branch called 'eval-branch-003-feature-login' from 'main'.",
+      "difficulty": "easy",
+      "status": "PASS",
+      "passed": true,
+      "agent_response": "Status: verified, Verified: True",
+      "tool_calls": [
+        {
+          "operation_id": "repos/get-branch",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-sandbox-repo",
+            "branch": "main"
+          }
+        },
+        {
+          "operation_id": "git/create-ref",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-sandbox-repo",
+            "ref": "refs/heads/eval-branch-003-feature-login",
+            "sha": "$repos/get-branch.commit.sha"
+          }
+        }
+      ],
+      "results": [
+        {
+          "operation_id": "repos/get-branch",
+          "success": true,
+          "result": "Branch(name=\"main\")",
+          "error": null,
+          "error_type": null
+        },
+        {
+          "operation_id": "git/create-ref",
+          "success": true,
+          "result": "GitRef(ref=\"refs/heads/eval-branch-003-feature-login\")",
+          "error": null,
+          "error_type": null
+        }
+      ],
+      "verification": {
+        "passed": true,
         "resource": "multi_resource",
         "identifier": "bharath-rdy4/eval-sandbox-repo",
         "results": {
           "branch": {
-            "passed": false,
+            "passed": true,
             "resource": "branch",
             "identifier": "eval-branch-003-feature-login",
             "checks": {
-              "exists": false
+              "exists": true,
+              "name": true
             },
             "expected_state": {
-              "exists": true
+              "exists": true,
+              "name": "eval-branch-003-feature-login",
+              "base": "main"
             },
-            "actual_state": {},
-            "errors": [
-              "Branch 'eval-branch-003-feature-login' not found in 'bharath-rdy4/eval-sandbox-repo'."
-            ],
-            "error_kind": "VERIFICATION_FAILURE"
+            "actual_state": {
+              "name": "eval-branch-003-feature-login",
+              "protected": false
+            },
+            "errors": []
           }
         },
-        "errors": [
-          "Branch 'eval-branch-003-feature-login' not found in 'bharath-rdy4/eval-sandbox-repo'."
-        ]
+        "errors": []
       },
-      "error": "Branch 'eval-branch-003-feature-login' not found in 'bharath-rdy4/eval-sandbox-repo'.",
-      "duration_seconds": 11.8,
-      "attempts": 1
+      "error": null,
+      "duration_seconds": 12.63,
+      "attempts": 1,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "type": "initial",
+          "passed": true,
+          "duration_seconds": 10.06,
+          "operations": [
+            "repos/get-branch",
+            "git/create-ref"
+          ],
+          "error": null
+        }
+      ]
+    },
+    {
+      "task_id": "task_04_create_branch_and_issue",
+      "instruction": "Create a branch called 'eval-branch-004-feature-login' from 'main', then create an issue titled 'eval-issue-004: Login feature' describing the required login functionality.",
+      "difficulty": "easy",
+      "status": "PASS",
+      "passed": true,
+      "agent_response": "Status: verified, Verified: True",
+      "tool_calls": [
+        {
+          "operation_id": "repos/get-branch",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-sandbox-repo",
+            "branch": "main"
+          }
+        },
+        {
+          "operation_id": "git/create-ref",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-sandbox-repo",
+            "ref": "refs/heads/eval-branch-004-feature-login",
+            "sha": "${repos/get-branch.object.sha}"
+          }
+        },
+        {
+          "operation_id": "issues/create",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-sandbox-repo",
+            "title": "eval-issue-004: Login feature",
+            "body": "Required login functionality implementation details."
+          }
+        }
+      ],
+      "results": [
+        {
+          "operation_id": "repos/get-branch",
+          "success": true,
+          "result": "Branch(name=\"main\")",
+          "error": null,
+          "error_type": null
+        },
+        {
+          "operation_id": "git/create-ref",
+          "success": true,
+          "result": "GitRef(ref=\"refs/heads/eval-branch-004-feature-login\")",
+          "error": null,
+          "error_type": null
+        },
+        {
+          "operation_id": "issues/create",
+          "success": true,
+          "result": "Issue(title=\"eval-issue-004: Login feature\", number=281)",
+          "error": null,
+          "error_type": null
+        }
+      ],
+      "verification": {
+        "passed": true,
+        "resource": "multi_resource",
+        "identifier": "bharath-rdy4/eval-sandbox-repo",
+        "results": {
+          "branch": {
+            "passed": true,
+            "resource": "branch",
+            "identifier": "eval-branch-004-feature-login",
+            "checks": {
+              "exists": true,
+              "name": true
+            },
+            "expected_state": {
+              "exists": true,
+              "name": "eval-branch-004-feature-login",
+              "base": "main"
+            },
+            "actual_state": {
+              "name": "eval-branch-004-feature-login",
+              "protected": false
+            },
+            "errors": []
+          },
+          "issue": {
+            "passed": true,
+            "resource": "issue",
+            "identifier": 281,
+            "checks": {
+              "exists": true,
+              "title": true,
+              "state": true
+            },
+            "expected_state": {
+              "exists": true,
+              "title": "eval-issue-004: Login feature",
+              "state": "open"
+            },
+            "actual_state": {
+              "number": 281,
+              "title": "eval-issue-004: Login feature",
+              "body": "Required login functionality implementation details.",
+              "body_contains": "Required login functionality implementation details.",
+              "state": "open",
+              "locked": false,
+              "lock_reason": null,
+              "comments": 0,
+              "user": "bharath-rdy4",
+              "assignees": [],
+              "milestone": null,
+              "labels": []
+            },
+            "errors": []
+          }
+        },
+        "errors": []
+      },
+      "error": null,
+      "duration_seconds": 31.52,
+      "attempts": 1,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "type": "initial",
+          "passed": true,
+          "duration_seconds": 16.69,
+          "operations": [
+            "repos/get-branch",
+            "git/create-ref",
+            "issues/create"
+          ],
+          "error": null
+        }
+      ]
+    },
+    {
+      "task_id": "task_05_create_issue_and_comment",
+      "instruction": "Create an issue titled 'eval-issue-005: Login bug' describing the login problem, then add a comment saying 'Investigating this issue'.",
+      "difficulty": "medium",
+      "status": "PASS",
+      "passed": true,
+      "agent_response": "Status: verified, Verified: True",
+      "tool_calls": [
+        {
+          "operation_id": "issues/create",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-sandbox-repo",
+            "title": "eval-issue-005: Login bug",
+            "body": "Users are experiencing problems when attempting to log into the application."
+          }
+        },
+        {
+          "operation_id": "issues/create-comment",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-sandbox-repo",
+            "issue_number": "$output.issues/create.number$",
+            "body": "Investigating this issue"
+          }
+        }
+      ],
+      "results": [
+        {
+          "operation_id": "issues/create",
+          "success": true,
+          "result": "Issue(title=\"eval-issue-005: Login bug\", number=282)",
+          "error": null,
+          "error_type": null
+        },
+        {
+          "operation_id": "issues/create-comment",
+          "success": true,
+          "result": "IssueComment(user=NamedUser(login=\"bharath-rdy4\"), id=5606977407)",
+          "error": null,
+          "error_type": null
+        }
+      ],
+      "verification": {
+        "passed": true,
+        "resource": "multi_resource",
+        "identifier": "bharath-rdy4/eval-sandbox-repo",
+        "results": {
+          "issue": {
+            "passed": true,
+            "resource": "issue",
+            "identifier": 282,
+            "checks": {
+              "exists": true,
+              "title": true,
+              "state": true,
+              "comments": true,
+              "comment_contains": true
+            },
+            "expected_state": {
+              "exists": true,
+              "title": "eval-issue-005: Login bug",
+              "state": "open",
+              "comments": 1,
+              "comment_contains": "Investigating this issue"
+            },
+            "actual_state": {
+              "number": 282,
+              "title": "eval-issue-005: Login bug",
+              "body": "Users are experiencing problems when attempting to log into the application.",
+              "body_contains": "Users are experiencing problems when attempting to log into the application.",
+              "state": "open",
+              "locked": false,
+              "lock_reason": null,
+              "comments": 1,
+              "comment_contains": [
+                "Investigating this issue"
+              ],
+              "user": "bharath-rdy4",
+              "assignees": [],
+              "milestone": null,
+              "labels": []
+            },
+            "errors": []
+          }
+        },
+        "errors": []
+      },
+      "error": null,
+      "duration_seconds": 23.11,
+      "attempts": 1,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "type": "initial",
+          "passed": true,
+          "duration_seconds": 11.6,
+          "operations": [
+            "issues/create",
+            "issues/create-comment"
+          ],
+          "error": null
+        }
+      ]
+    },
+    {
+      "task_id": "task_06_create_and_update_issue",
+      "instruction": "Create an issue titled 'eval-issue-006: Login bug', then update its title to 'eval-issue-006: Critical login bug' and change its description to indicate that all new users are affected.",
+      "difficulty": "medium",
+      "status": "PASS",
+      "passed": true,
+      "agent_response": "Status: verified, Verified: True",
+      "tool_calls": [
+        {
+          "operation_id": "issues/create",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-sandbox-repo",
+            "title": "eval-issue-006: Login bug"
+          }
+        },
+        {
+          "operation_id": "issues/update",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-sandbox-repo",
+            "issue_number": "$output.issues/create.response.body.number$",
+            "title": "eval-issue-006: Critical login bug",
+            "body": "All new users are affected."
+          }
+        }
+      ],
+      "results": [
+        {
+          "operation_id": "issues/create",
+          "success": true,
+          "result": "Issue(title=\"eval-issue-006: Login bug\", number=283)",
+          "error": null,
+          "error_type": null
+        },
+        {
+          "operation_id": "issues/update",
+          "success": true,
+          "result": "Issue(title=\"eval-issue-006: Critical login bug\", number=283)",
+          "error": null,
+          "error_type": null
+        }
+      ],
+      "verification": {
+        "passed": true,
+        "resource": "multi_resource",
+        "identifier": "bharath-rdy4/eval-sandbox-repo",
+        "results": {
+          "issue": {
+            "passed": true,
+            "resource": "issue",
+            "identifier": 283,
+            "checks": {
+              "exists": true,
+              "title": true,
+              "body_contains": true,
+              "state": true
+            },
+            "expected_state": {
+              "exists": true,
+              "title": "eval-issue-006: Critical login bug",
+              "body_contains": "all new users are affected",
+              "state": "open"
+            },
+            "actual_state": {
+              "number": 283,
+              "title": "eval-issue-006: Critical login bug",
+              "body": "All new users are affected.",
+              "body_contains": "All new users are affected.",
+              "state": "open",
+              "locked": false,
+              "lock_reason": null,
+              "comments": 0,
+              "user": "bharath-rdy4",
+              "assignees": [],
+              "milestone": null,
+              "labels": []
+            },
+            "errors": []
+          }
+        },
+        "errors": []
+      },
+      "error": null,
+      "duration_seconds": 22.54,
+      "attempts": 1,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "type": "initial",
+          "passed": true,
+          "duration_seconds": 11.6,
+          "operations": [
+            "issues/create",
+            "issues/update"
+          ],
+          "error": null
+        }
+      ]
+    },
+    {
+      "task_id": "task_07_create_branch_and_pr",
+      "instruction": "Create a branch called 'eval-branch-007-feature-login' from 'main', then open a pull request from 'eval-branch-007-feature-login' into 'main' titled 'eval-pr-007: Add login feature'.",
+      "difficulty": "medium",
+      "status": "PASS",
+      "passed": true,
+      "agent_response": "Status: verified, Verified: True",
+      "tool_calls": [
+        {
+          "operation_id": "repos/get-branch",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-sandbox-repo",
+            "branch": "main"
+          }
+        },
+        {
+          "operation_id": "git/create-ref",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-sandbox-repo",
+            "ref": "refs/heads/eval-branch-007-feature-login",
+            "sha": "<$.operations[0].result.commit.sha>"
+          }
+        },
+        {
+          "operation_id": "pulls/create",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-sandbox-repo",
+            "title": "eval-pr-007: Add login feature",
+            "head": "eval-branch-007-feature-login",
+            "base": "main",
+            "body": "Pull request for adding the login feature."
+          }
+        }
+      ],
+      "results": [
+        {
+          "operation_id": "repos/get-branch",
+          "success": true,
+          "result": "Branch(name=\"main\")",
+          "error": null,
+          "error_type": null
+        },
+        {
+          "operation_id": "git/create-ref",
+          "success": true,
+          "result": "GitRef(ref=\"refs/heads/eval-branch-007-feature-login\")",
+          "error": null,
+          "error_type": null
+        },
+        {
+          "operation_id": "pulls/create",
+          "success": true,
+          "result": "PullRequest(title=\"eval-pr-007: Add login feature\", number=284)",
+          "error": null,
+          "error_type": null
+        }
+      ],
+      "verification": {
+        "passed": true,
+        "resource": "multi_resource",
+        "identifier": "bharath-rdy4/eval-sandbox-repo",
+        "results": {
+          "branch": {
+            "passed": true,
+            "resource": "branch",
+            "identifier": "eval-branch-007-feature-login",
+            "checks": {
+              "exists": true,
+              "name": true
+            },
+            "expected_state": {
+              "exists": true,
+              "name": "eval-branch-007-feature-login",
+              "base": "main"
+            },
+            "actual_state": {
+              "name": "eval-branch-007-feature-login",
+              "protected": false
+            },
+            "errors": []
+          },
+          "pull_request": {
+            "passed": true,
+            "resource": "pull_request",
+            "identifier": 284,
+            "checks": {
+              "exists": true,
+              "title": true,
+              "head": true,
+              "base": true,
+              "state": true
+            },
+            "expected_state": {
+              "exists": true,
+              "title": "eval-pr-007: Add login feature",
+              "head": "eval-branch-007-feature-login",
+              "base": "main",
+              "state": "open"
+            },
+            "actual_state": {
+              "number": 284,
+              "title": "eval-pr-007: Add login feature",
+              "body": "Pull request for adding the login feature.",
+              "state": "open",
+              "merged": false,
+              "draft": false,
+              "head": "eval-branch-007-feature-login",
+              "base": "main"
+            },
+            "errors": []
+          }
+        },
+        "errors": []
+      },
+      "error": null,
+      "duration_seconds": 46.09,
+      "attempts": 1,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "type": "initial",
+          "passed": true,
+          "duration_seconds": 38.31,
+          "operations": [
+            "repos/get-branch",
+            "git/create-ref",
+            "pulls/create"
+          ],
+          "error": null
+        }
+      ]
+    },
+    {
+      "task_id": "task_08_create_branch_issue_pr",
+      "instruction": "Create a branch called 'eval-branch-008-bug-fix' from 'main'. Create an issue titled 'eval-issue-008: Fix login failure'. Then create a pull request from 'eval-branch-008-bug-fix' into 'main' referencing that issue.",
+      "difficulty": "medium",
+      "status": "PASS",
+      "passed": true,
+      "agent_response": "Status: verified, Verified: True",
+      "tool_calls": [
+        {
+          "operation_id": "repos/get-branch",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-sandbox-repo",
+            "branch": "main"
+          }
+        },
+        {
+          "operation_id": "git/create-ref",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-sandbox-repo",
+            "ref": "refs/heads/eval-branch-008-bug-fix",
+            "sha": "<$.repos/get-branch.commit.sha>"
+          }
+        },
+        {
+          "operation_id": "issues/create",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-sandbox-repo",
+            "title": "eval-issue-008: Fix login failure",
+            "body": "Fixing login failure issue."
+          }
+        },
+        {
+          "operation_id": "pulls/create",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-sandbox-repo",
+            "title": "Fix login failure",
+            "body": "Resolves eval-issue-008: Fix login failure",
+            "head": "eval-branch-008-bug-fix",
+            "base": "main"
+          }
+        }
+      ],
+      "results": [
+        {
+          "operation_id": "repos/get-branch",
+          "success": true,
+          "result": "Branch(name=\"main\")",
+          "error": null,
+          "error_type": null
+        },
+        {
+          "operation_id": "git/create-ref",
+          "success": true,
+          "result": "GitRef(ref=\"refs/heads/eval-branch-008-bug-fix\")",
+          "error": null,
+          "error_type": null
+        },
+        {
+          "operation_id": "issues/create",
+          "success": true,
+          "result": "Issue(title=\"eval-issue-008: Fix login failure\", number=285)",
+          "error": null,
+          "error_type": null
+        },
+        {
+          "operation_id": "pulls/create",
+          "success": true,
+          "result": "PullRequest(title=\"Fix login failure\", number=286)",
+          "error": null,
+          "error_type": null
+        }
+      ],
+      "verification": {
+        "passed": true,
+        "resource": "multi_resource",
+        "identifier": "bharath-rdy4/eval-sandbox-repo",
+        "results": {
+          "branch": {
+            "passed": true,
+            "resource": "branch",
+            "identifier": "eval-branch-008-bug-fix",
+            "checks": {
+              "exists": true,
+              "name": true
+            },
+            "expected_state": {
+              "exists": true,
+              "name": "eval-branch-008-bug-fix",
+              "base": "main"
+            },
+            "actual_state": {
+              "name": "eval-branch-008-bug-fix",
+              "protected": false
+            },
+            "errors": []
+          },
+          "issue": {
+            "passed": true,
+            "resource": "issue",
+            "identifier": 285,
+            "checks": {
+              "exists": true,
+              "title": true,
+              "state": true
+            },
+            "expected_state": {
+              "exists": true,
+              "title": "eval-issue-008: Fix login failure",
+              "state": "open"
+            },
+            "actual_state": {
+              "number": 285,
+              "title": "eval-issue-008: Fix login failure",
+              "body": "Fixing login failure issue.",
+              "body_contains": "Fixing login failure issue.",
+              "state": "open",
+              "locked": false,
+              "lock_reason": null,
+              "comments": 0,
+              "user": "bharath-rdy4",
+              "assignees": [],
+              "milestone": null,
+              "labels": []
+            },
+            "errors": []
+          },
+          "pull_request": {
+            "passed": true,
+            "resource": "pull_request",
+            "identifier": 286,
+            "checks": {
+              "exists": true,
+              "head": true,
+              "base": true,
+              "state": true,
+              "references_issue": true
+            },
+            "expected_state": {
+              "exists": true,
+              "head": "eval-branch-008-bug-fix",
+              "base": "main",
+              "state": "open",
+              "references_issue": "eval-issue-008"
+            },
+            "actual_state": {
+              "number": 286,
+              "title": "Fix login failure",
+              "body": "Resolves eval-issue-008: Fix login failure",
+              "state": "open",
+              "merged": false,
+              "draft": false,
+              "head": "eval-branch-008-bug-fix",
+              "base": "main"
+            },
+            "errors": []
+          }
+        },
+        "errors": []
+      },
+      "error": null,
+      "duration_seconds": 65.62,
+      "attempts": 1,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "type": "initial",
+          "passed": true,
+          "duration_seconds": 45.96,
+          "operations": [
+            "repos/get-branch",
+            "git/create-ref",
+            "issues/create",
+            "pulls/create"
+          ],
+          "error": null
+        }
+      ]
+    },
+    {
+      "task_id": "task_09_branch_issue_pr_label",
+      "instruction": "Create a branch called 'eval-branch-009-bug-fix' from 'main'. Create an issue titled 'eval-issue-009: Login failure' describing the bug. Create an open pull request from 'eval-branch-009-bug-fix' into 'main' that references the issue. Add the 'needs-review' label to the issue.",
+      "difficulty": "hard",
+      "status": "PASS",
+      "passed": true,
+      "agent_response": "Status: verified, Verified: True",
+      "tool_calls": [
+        {
+          "operation_id": "git/get-ref",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-sandbox-repo",
+            "ref": "heads/main"
+          }
+        },
+        {
+          "operation_id": "git/create-ref",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-sandbox-repo",
+            "ref": "refs/heads/eval-branch-009-bug-fix",
+            "sha": "$git/get-ref.object.sha"
+          }
+        },
+        {
+          "operation_id": "issues/create",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-sandbox-repo",
+            "title": "eval-issue-009: Login failure",
+            "body": "Bug description: Users are experiencing login failure when using valid credentials.",
+            "labels": [
+              "needs-review"
+            ]
+          }
+        },
+        {
+          "operation_id": "pulls/create",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-sandbox-repo",
+            "title": "Fix login failure",
+            "head": "eval-branch-009-bug-fix",
+            "base": "main",
+            "body": "Resolves eval-issue-009: Login failure"
+          }
+        }
+      ],
+      "results": [
+        {
+          "operation_id": "git/get-ref",
+          "success": true,
+          "result": "GitRef(ref=\"refs/heads/main\")",
+          "error": null,
+          "error_type": null
+        },
+        {
+          "operation_id": "git/create-ref",
+          "success": true,
+          "result": "GitRef(ref=\"refs/heads/eval-branch-009-bug-fix\")",
+          "error": null,
+          "error_type": null
+        },
+        {
+          "operation_id": "issues/create",
+          "success": true,
+          "result": "Issue(title=\"eval-issue-009: Login failure\", number=287)",
+          "error": null,
+          "error_type": null
+        },
+        {
+          "operation_id": "pulls/create",
+          "success": true,
+          "result": "PullRequest(title=\"Fix login failure\", number=288)",
+          "error": null,
+          "error_type": null
+        }
+      ],
+      "verification": {
+        "passed": true,
+        "resource": "multi_resource",
+        "identifier": "bharath-rdy4/eval-sandbox-repo",
+        "results": {
+          "branch": {
+            "passed": true,
+            "resource": "branch",
+            "identifier": "eval-branch-009-bug-fix",
+            "checks": {
+              "exists": true,
+              "name": true
+            },
+            "expected_state": {
+              "exists": true,
+              "name": "eval-branch-009-bug-fix",
+              "base": "main"
+            },
+            "actual_state": {
+              "name": "eval-branch-009-bug-fix",
+              "protected": false
+            },
+            "errors": []
+          },
+          "issue": {
+            "passed": true,
+            "resource": "issue",
+            "identifier": 287,
+            "checks": {
+              "exists": true,
+              "title": true,
+              "state": true,
+              "labels": true
+            },
+            "expected_state": {
+              "exists": true,
+              "title": "eval-issue-009: Login failure",
+              "state": "open",
+              "labels": [
+                "needs-review"
+              ]
+            },
+            "actual_state": {
+              "number": 287,
+              "title": "eval-issue-009: Login failure",
+              "body": "Bug description: Users are experiencing login failure when using valid credentials.",
+              "body_contains": "Bug description: Users are experiencing login failure when using valid credentials.",
+              "state": "open",
+              "locked": false,
+              "lock_reason": null,
+              "comments": 0,
+              "user": "bharath-rdy4",
+              "assignees": [],
+              "milestone": null,
+              "labels": [
+                "needs-review"
+              ]
+            },
+            "errors": []
+          },
+          "pull_request": {
+            "passed": true,
+            "resource": "pull_request",
+            "identifier": 288,
+            "checks": {
+              "exists": true,
+              "head": true,
+              "base": true,
+              "state": true,
+              "references_issue": true
+            },
+            "expected_state": {
+              "exists": true,
+              "head": "eval-branch-009-bug-fix",
+              "base": "main",
+              "state": "open",
+              "references_issue": "eval-issue-009"
+            },
+            "actual_state": {
+              "number": 288,
+              "title": "Fix login failure",
+              "body": "Resolves eval-issue-009: Login failure",
+              "state": "open",
+              "merged": false,
+              "draft": false,
+              "head": "eval-branch-009-bug-fix",
+              "base": "main"
+            },
+            "errors": []
+          }
+        },
+        "errors": []
+      },
+      "error": null,
+      "duration_seconds": 45.68,
+      "attempts": 1,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "type": "initial",
+          "passed": true,
+          "duration_seconds": 26.32,
+          "operations": [
+            "git/get-ref",
+            "git/create-ref",
+            "issues/create",
+            "pulls/create"
+          ],
+          "error": null
+        }
+      ]
+    },
+    {
+      "task_id": "task_10_issue_label_comment_close",
+      "instruction": "Create an issue titled 'eval-issue-010: Resolved login bug', add the 'bug' label, add a comment saying 'Fix has been implemented', and close the issue.",
+      "difficulty": "hard",
+      "status": "PASS",
+      "passed": true,
+      "agent_response": "Status: verified, Verified: True",
+      "tool_calls": [
+        {
+          "operation_id": "issues/create",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-sandbox-repo",
+            "title": "eval-issue-010: Resolved login bug",
+            "labels": [
+              "bug"
+            ]
+          }
+        },
+        {
+          "operation_id": "issues/create-comment",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-sandbox-repo",
+            "issue_number": "$output.issues/create.number$",
+            "body": "Fix has been implemented"
+          }
+        },
+        {
+          "operation_id": "issues/update",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-sandbox-repo",
+            "issue_number": "$output.issues/create.number$",
+            "state": "closed"
+          }
+        }
+      ],
+      "results": [
+        {
+          "operation_id": "issues/create",
+          "success": true,
+          "result": "Issue(title=\"eval-issue-010: Resolved login bug\", number=289)",
+          "error": null,
+          "error_type": null
+        },
+        {
+          "operation_id": "issues/create-comment",
+          "success": true,
+          "result": "IssueComment(user=NamedUser(login=\"bharath-rdy4\"), id=5607019115)",
+          "error": null,
+          "error_type": null
+        },
+        {
+          "operation_id": "issues/update",
+          "success": true,
+          "result": "Issue(title=\"eval-issue-010: Resolved login bug\", number=289)",
+          "error": null,
+          "error_type": null
+        }
+      ],
+      "verification": {
+        "passed": true,
+        "resource": "multi_resource",
+        "identifier": "bharath-rdy4/eval-sandbox-repo",
+        "results": {
+          "issue": {
+            "passed": true,
+            "resource": "issue",
+            "identifier": 289,
+            "checks": {
+              "exists": true,
+              "title": true,
+              "state": true,
+              "labels": true,
+              "comment_contains": true
+            },
+            "expected_state": {
+              "exists": true,
+              "title": "eval-issue-010: Resolved login bug",
+              "state": "closed",
+              "labels": [
+                "bug"
+              ],
+              "comment_contains": "Fix has been implemented"
+            },
+            "actual_state": {
+              "number": 289,
+              "title": "eval-issue-010: Resolved login bug",
+              "body": "",
+              "body_contains": "",
+              "state": "closed",
+              "locked": false,
+              "lock_reason": null,
+              "comments": 1,
+              "comment_contains": [
+                "Fix has been implemented"
+              ],
+              "user": "bharath-rdy4",
+              "assignees": [],
+              "milestone": null,
+              "labels": [
+                "bug"
+              ]
+            },
+            "errors": []
+          }
+        },
+        "errors": []
+      },
+      "error": null,
+      "duration_seconds": 29.27,
+      "attempts": 1,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "type": "initial",
+          "passed": true,
+          "duration_seconds": 17.15,
+          "operations": [
+            "issues/create",
+            "issues/create-comment",
+            "issues/update"
+          ],
+          "error": null
+        }
+      ]
+    },
+    {
+      "task_id": "task_11_branch_pr_merge",
+      "instruction": "Create a branch called 'eval-branch-011-feature-login' from 'main', create a pull request from 'eval-branch-011-feature-login' into 'main' titled 'eval-pr-011: Add login feature', and merge the pull request.",
+      "difficulty": "hard",
+      "status": "PASS",
+      "passed": true,
+      "agent_response": "Status: verified, Verified: True",
+      "tool_calls": [
+        {
+          "operation_id": "repos/get-branch",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-sandbox-repo",
+            "branch": "main"
+          }
+        },
+        {
+          "operation_id": "git/create-ref",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-sandbox-repo",
+            "ref": "refs/heads/eval-branch-011-feature-login",
+            "sha": "<$.operations[0].response.commit.sha>"
+          }
+        },
+        {
+          "operation_id": "pulls/create",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-sandbox-repo",
+            "title": "eval-pr-011: Add login feature",
+            "head": "eval-branch-011-feature-login",
+            "base": "main",
+            "body": "Pull request for eval-branch-011-feature-login"
+          }
+        },
+        {
+          "operation_id": "pulls/merge",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-sandbox-repo",
+            "pull_number": "<$.operations[2].response.number>",
+            "commit_title": "Merge eval-pr-011: Add login feature"
+          }
+        }
+      ],
+      "results": [
+        {
+          "operation_id": "repos/get-branch",
+          "success": true,
+          "result": "Branch(name=\"main\")",
+          "error": null,
+          "error_type": null
+        },
+        {
+          "operation_id": "git/create-ref",
+          "success": true,
+          "result": "GitRef(ref=\"refs/heads/eval-branch-011-feature-login\")",
+          "error": null,
+          "error_type": null
+        },
+        {
+          "operation_id": "pulls/create",
+          "success": true,
+          "result": "PullRequest(title=\"eval-pr-011: Add login feature\", number=290)",
+          "error": null,
+          "error_type": null
+        },
+        {
+          "operation_id": "pulls/merge",
+          "success": true,
+          "result": "PullRequestMergeStatus(sha=\"5c6b44b463978a7eb3cc97e4e8d3a0ccf8a18f76\", merged=True)",
+          "error": null,
+          "error_type": null
+        }
+      ],
+      "verification": {
+        "passed": true,
+        "resource": "multi_resource",
+        "identifier": "bharath-rdy4/eval-sandbox-repo",
+        "results": {
+          "branch": {
+            "passed": true,
+            "resource": "branch",
+            "identifier": "eval-branch-011-feature-login",
+            "checks": {
+              "exists": true,
+              "name": true
+            },
+            "expected_state": {
+              "exists": true,
+              "name": "eval-branch-011-feature-login",
+              "base": "main"
+            },
+            "actual_state": {
+              "name": "eval-branch-011-feature-login",
+              "protected": false
+            },
+            "errors": []
+          },
+          "pull_request": {
+            "passed": true,
+            "resource": "pull_request",
+            "identifier": 290,
+            "checks": {
+              "exists": true,
+              "title": true,
+              "head": true,
+              "base": true,
+              "merged": true
+            },
+            "expected_state": {
+              "exists": true,
+              "title": "eval-pr-011: Add login feature",
+              "head": "eval-branch-011-feature-login",
+              "base": "main",
+              "merged": true
+            },
+            "actual_state": {
+              "number": 290,
+              "title": "eval-pr-011: Add login feature",
+              "body": "Pull request for eval-branch-011-feature-login",
+              "state": "closed",
+              "merged": true,
+              "draft": false,
+              "head": "eval-branch-011-feature-login",
+              "base": "main"
+            },
+            "errors": []
+          }
+        },
+        "errors": []
+      },
+      "error": null,
+      "duration_seconds": 530.75,
+      "attempts": 1,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "type": "initial",
+          "passed": true,
+          "duration_seconds": 523.05,
+          "operations": [
+            "repos/get-branch",
+            "git/create-ref",
+            "pulls/create",
+            "pulls/merge"
+          ],
+          "error": null
+        }
+      ]
+    },
+    {
+      "task_id": "task_12_repository_and_issue",
+      "instruction": "Create a private repository called 'eval-repo-012-login-sandbox', then create an issue titled 'eval-issue-012: Initial login bug' in that repository.",
+      "difficulty": "hard",
+      "status": "PASS",
+      "passed": true,
+      "agent_response": "Status: verified, Verified: True",
+      "tool_calls": [
+        {
+          "operation_id": "repos/create-for-authenticated-user",
+          "arguments": {
+            "name": "eval-repo-012-login-sandbox",
+            "private": true
+          }
+        },
+        {
+          "operation_id": "issues/create",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-repo-012-login-sandbox",
+            "title": "eval-issue-012: Initial login bug"
+          }
+        }
+      ],
+      "results": [
+        {
+          "operation_id": "repos/create-for-authenticated-user",
+          "success": true,
+          "result": "Repository(full_name=\"bharath-rdy4/eval-repo-012-login-sandbox\")",
+          "error": null,
+          "error_type": null
+        },
+        {
+          "operation_id": "issues/create",
+          "success": true,
+          "result": "Issue(title=\"eval-issue-012: Initial login bug\", number=1)",
+          "error": null,
+          "error_type": null
+        }
+      ],
+      "verification": {
+        "passed": true,
+        "resource": "multi_resource",
+        "identifier": "bharath-rdy4/eval-repo-012-login-sandbox",
+        "results": {
+          "repository": {
+            "passed": true,
+            "resource": "repository",
+            "identifier": "bharath-rdy4/eval-repo-012-login-sandbox",
+            "checks": {
+              "exists": true,
+              "name": true,
+              "private": true
+            },
+            "expected_state": {
+              "exists": true,
+              "name": "eval-repo-012-login-sandbox",
+              "private": true
+            },
+            "actual_state": {
+              "name": "eval-repo-012-login-sandbox",
+              "full_name": "bharath-rdy4/eval-repo-012-login-sandbox",
+              "description": null,
+              "private": true,
+              "visibility": "private",
+              "default_branch": "main",
+              "archived": false,
+              "disabled": false,
+              "fork": false,
+              "has_issues": true,
+              "has_wiki": false,
+              "has_projects": true,
+              "has_discussions": false,
+              "allow_squash_merge": true,
+              "allow_merge_commit": true,
+              "allow_rebase_merge": true,
+              "allow_auto_merge": false,
+              "delete_branch_on_merge": false,
+              "topics": []
+            },
+            "errors": []
+          },
+          "issue": {
+            "passed": true,
+            "resource": "issue",
+            "identifier": 1,
+            "checks": {
+              "exists": true,
+              "title": true,
+              "state": true
+            },
+            "expected_state": {
+              "exists": true,
+              "title": "eval-issue-012: Initial login bug",
+              "state": "open"
+            },
+            "actual_state": {
+              "number": 1,
+              "title": "eval-issue-012: Initial login bug",
+              "body": "",
+              "body_contains": "",
+              "state": "open",
+              "locked": false,
+              "lock_reason": null,
+              "comments": 0,
+              "user": "bharath-rdy4",
+              "assignees": [],
+              "milestone": null,
+              "labels": []
+            },
+            "errors": []
+          }
+        },
+        "errors": []
+      },
+      "error": null,
+      "duration_seconds": 51.81,
+      "attempts": 1,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "type": "initial",
+          "passed": true,
+          "duration_seconds": 37.52,
+          "operations": [
+            "repos/create-for-authenticated-user",
+            "issues/create"
+          ],
+          "error": null
+        }
+      ]
+    },
+    {
+      "task_id": "task_13_repo_branch_issue_pr",
+      "instruction": "Create a private repository called 'eval-repo-013-login-workflow'. Create a branch called 'eval-branch-013-feature-login' from 'main'. Create an issue titled 'eval-issue-013: Implement login'. Then create an open pull request from 'eval-branch-013-feature-login' into 'main' referencing the issue.",
+      "difficulty": "hard",
+      "status": "PASS",
+      "passed": true,
+      "agent_response": "Status: verified, Verified: True",
+      "tool_calls": [
+        {
+          "operation_id": "repos/create-for-authenticated-user",
+          "arguments": {
+            "name": "eval-repo-013-login-workflow",
+            "private": true,
+            "auto_init": true
+          }
+        },
+        {
+          "operation_id": "git/get-ref",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-repo-013-login-workflow",
+            "ref": "heads/main"
+          }
+        },
+        {
+          "operation_id": "git/create-ref",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-repo-013-login-workflow",
+            "ref": "refs/heads/eval-branch-013-feature-login",
+            "sha": "<$.operations[1].output.object.sha>"
+          }
+        },
+        {
+          "operation_id": "issues/create",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-repo-013-login-workflow",
+            "title": "eval-issue-013: Implement login",
+            "body": "Task to implement login functionality."
+          }
+        },
+        {
+          "operation_id": "pulls/create",
+          "arguments": {
+            "owner": "bharath-rdy4",
+            "repo": "eval-repo-013-login-workflow",
+            "title": "Implement login feature",
+            "head": "eval-branch-013-feature-login",
+            "base": "main",
+            "body": "Resolves eval-issue-013: Implement login"
+          }
+        }
+      ],
+      "results": [
+        {
+          "operation_id": "repos/create-for-authenticated-user",
+          "success": true,
+          "result": "Repository(full_name=\"bharath-rdy4/eval-repo-013-login-workflow\")",
+          "error": null,
+          "error_type": null
+        },
+        {
+          "operation_id": "git/get-ref",
+          "success": true,
+          "result": "GitRef(ref=\"refs/heads/main\")",
+          "error": null,
+          "error_type": null
+        },
+        {
+          "operation_id": "git/create-ref",
+          "success": true,
+          "result": "GitRef(ref=\"refs/heads/eval-branch-013-feature-login\")",
+          "error": null,
+          "error_type": null
+        },
+        {
+          "operation_id": "issues/create",
+          "success": true,
+          "result": "Issue(title=\"eval-issue-013: Implement login\", number=1)",
+          "error": null,
+          "error_type": null
+        },
+        {
+          "operation_id": "pulls/create",
+          "success": true,
+          "result": "PullRequest(title=\"Implement login feature\", number=2)",
+          "error": null,
+          "error_type": null
+        }
+      ],
+      "verification": {
+        "passed": true,
+        "resource": "multi_resource",
+        "identifier": "bharath-rdy4/eval-repo-013-login-workflow",
+        "results": {
+          "repository": {
+            "passed": true,
+            "resource": "repository",
+            "identifier": "bharath-rdy4/eval-repo-013-login-workflow",
+            "checks": {
+              "exists": true,
+              "name": true,
+              "private": true
+            },
+            "expected_state": {
+              "exists": true,
+              "name": "eval-repo-013-login-workflow",
+              "private": true
+            },
+            "actual_state": {
+              "name": "eval-repo-013-login-workflow",
+              "full_name": "bharath-rdy4/eval-repo-013-login-workflow",
+              "description": null,
+              "private": true,
+              "visibility": "private",
+              "default_branch": "main",
+              "archived": false,
+              "disabled": false,
+              "fork": false,
+              "has_issues": true,
+              "has_wiki": false,
+              "has_projects": true,
+              "has_discussions": false,
+              "allow_squash_merge": true,
+              "allow_merge_commit": true,
+              "allow_rebase_merge": true,
+              "allow_auto_merge": false,
+              "delete_branch_on_merge": false,
+              "topics": []
+            },
+            "errors": []
+          },
+          "branch": {
+            "passed": true,
+            "resource": "branch",
+            "identifier": "eval-branch-013-feature-login",
+            "checks": {
+              "exists": true,
+              "name": true
+            },
+            "expected_state": {
+              "exists": true,
+              "name": "eval-branch-013-feature-login",
+              "base": "main"
+            },
+            "actual_state": {
+              "name": "eval-branch-013-feature-login",
+              "protected": false
+            },
+            "errors": []
+          },
+          "issue": {
+            "passed": true,
+            "resource": "issue",
+            "identifier": 1,
+            "checks": {
+              "exists": true,
+              "title": true,
+              "state": true
+            },
+            "expected_state": {
+              "exists": true,
+              "title": "eval-issue-013: Implement login",
+              "state": "open"
+            },
+            "actual_state": {
+              "number": 1,
+              "title": "eval-issue-013: Implement login",
+              "body": "Task to implement login functionality.",
+              "body_contains": "Task to implement login functionality.",
+              "state": "open",
+              "locked": false,
+              "lock_reason": null,
+              "comments": 0,
+              "user": "bharath-rdy4",
+              "assignees": [],
+              "milestone": null,
+              "labels": []
+            },
+            "errors": []
+          },
+          "pull_request": {
+            "passed": true,
+            "resource": "pull_request",
+            "identifier": 2,
+            "checks": {
+              "exists": true,
+              "head": true,
+              "base": true,
+              "state": true,
+              "references_issue": true
+            },
+            "expected_state": {
+              "exists": true,
+              "head": "eval-branch-013-feature-login",
+              "base": "main",
+              "state": "open",
+              "references_issue": "eval-issue-013"
+            },
+            "actual_state": {
+              "number": 2,
+              "title": "Implement login feature",
+              "body": "Resolves eval-issue-013: Implement login",
+              "state": "open",
+              "merged": false,
+              "draft": false,
+              "head": "eval-branch-013-feature-login",
+              "base": "main"
+            },
+            "errors": []
+          }
+        },
+        "errors": []
+      },
+      "error": null,
+      "duration_seconds": 83.77,
+      "attempts": 1,
+      "attempt_history": [
+        {
+          "attempt": 1,
+          "type": "initial",
+          "passed": true,
+          "duration_seconds": 61.65,
+          "operations": [
+            "repos/create-for-authenticated-user",
+            "git/get-ref",
+            "git/create-ref",
+            "issues/create",
+            "pulls/create"
+          ],
+          "error": null
+        }
+      ]
     }
   ]
 }
